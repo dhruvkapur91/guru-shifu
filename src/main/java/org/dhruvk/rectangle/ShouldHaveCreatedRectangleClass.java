@@ -5,6 +5,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 
+import static org.apache.commons.io.FilenameUtils.getExtension;
+
 public class ShouldHaveCreatedRectangleClass implements Rule {
 
     private final Path sourcePath;
@@ -26,7 +28,7 @@ public class ShouldHaveCreatedRectangleClass implements Rule {
         try {
             long count = Files.walk(sourcePath)
                     .filter(Files::isRegularFile)
-                    .filter(file -> file.endsWith("*.java"))
+                    .filter(file -> getExtension(file.toString()).equals("java"))
                     .count();
             if (count == 0) {
                 return true;
