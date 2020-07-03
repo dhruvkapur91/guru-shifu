@@ -16,19 +16,22 @@ public class ShouldHaveCreatedRectangleClass implements Rule {
 
     @Override
     public Optional<String> suggestionKey() {
+        if (doesRectangleClassExist()) return Optional.empty();
+        return Optional.of("NO_JAVA_FILE_FOUND");
+    }
+
+    private boolean doesRectangleClassExist() {
         try {
             long count = Files.walk(sourcePath) // Todo - better name?
                     .filter(Files::isRegularFile)
                     .filter(file -> file.endsWith("Rectangle.java"))
                     .count();
             if (count == 1) {
-                return Optional.empty();
+                return true;
             }
         } catch (IOException e) {
             throw new RuntimeException(e); // This logic of traversing a path and figuring out if the file is present should likely be extracted out...
         }
-
-
-        return Optional.of("NO_JAVA_FILE_FOUND");
+        return false;
     }
 }
