@@ -15,6 +15,7 @@ import static org.hamcrest.Matchers.is;
 class ShouldHaveCreatedRectangleClassTest {
     private static final Path directoryWithNoJavaFiles = get("src/test/resources/org/dhruvk/rectangle/directory_with_no_java_files").toAbsolutePath();
     private static final Path directoryWithOnlyRectangleFile = get("src/test/resources/org/dhruvk/rectangle/directory_with_only_rectangle_file").toAbsolutePath();
+    private static final Path directoryWithOnlyRectangleFileWithoutFollowingConventions = get("src/test/resources/org/dhruvk/rectangle/directory_with_only_rectangle_file_without_following_conventions").toAbsolutePath();
     private static final Path directoryWithRectanglePlusUnnecessaryFiles = get("src/test/resources/org/dhruvk/rectangle/directory_with_rectangle_plus_unnecessary_files").toAbsolutePath();
 
 //     TODO - unable to add test for empty directory as git won't add it?
@@ -47,6 +48,13 @@ class ShouldHaveCreatedRectangleClassTest {
 
         Optional<String> expected = Optional.of("UNNECESSARY_FILES_FOUND");
 
+        assertThat(shouldHaveCreatedRectangleClass.suggestionKey(), is(expected));
+    }
+
+    @Test
+    void shouldFailIfNameOfTheClassDoesNotFollowJavaConventions() {
+        Rule shouldHaveCreatedRectangleClass = new ShouldHaveCreatedRectangleClass(directoryWithOnlyRectangleFileWithoutFollowingConventions);
+        Optional<String> expected = Optional.of("JAVA_FILE_NAMING_CONVENTIONS_NOT_FOLLOWED");
         assertThat(shouldHaveCreatedRectangleClass.suggestionKey(), is(expected));
     }
 }

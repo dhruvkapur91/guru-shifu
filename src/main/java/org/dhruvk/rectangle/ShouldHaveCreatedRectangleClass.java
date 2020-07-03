@@ -21,7 +21,24 @@ public class ShouldHaveCreatedRectangleClass implements Rule {
         if (moreThanOneFileExists()) return Optional.of("UNNECESSARY_FILES_FOUND");
         if (doesRectangleClassExist()) return Optional.empty();
         if (noJavaFileFound()) return Optional.of("NO_JAVA_FILE_FOUND");
+        if (lowerCaseClassFilesFound()) return Optional.of("JAVA_FILE_NAMING_CONVENTIONS_NOT_FOLLOWED");
         return Optional.of("UNKNOWN_SCENARIO");
+    }
+
+    private boolean lowerCaseClassFilesFound() {
+        try {
+            long count = Files.walk(sourcePath)
+                    .filter(Files::isRegularFile)
+                    .filter(file -> getExtension(file.toString()).equals("java"))
+                    .filter(file -> file.startsWith("[a-z]+"))
+                    .count();
+            if (count == 0) {
+                return true;
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e); // This logic of traversing a path and figuring out if the file is present should likely be extracted out...
+        }
+        return false;
     }
 
     private boolean noJavaFileFound() { // TODO - wait for removing the duplication of the Files API... lets see enough of it to understand what will be a good abstraction
