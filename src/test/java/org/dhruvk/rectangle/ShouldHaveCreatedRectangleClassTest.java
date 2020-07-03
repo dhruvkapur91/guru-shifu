@@ -37,6 +37,7 @@ class ShouldHaveCreatedRectangleClassTest {
 
     @Test
     void shouldRequireThatTheClientSendsAnAbsolutePath() {
-        Assertions.assertThrows(AssertionError.class, () -> new ShouldHaveCreatedRectangleClass(Paths.get("some/relative/directory")));
+        AssertionError assertionError = Assertions.assertThrows(AssertionError.class, () -> new ShouldHaveCreatedRectangleClass(get("some/relative/directory")));
+        assertThat(assertionError.getMessage(), is("Expected absolute path, but looks like you passed a relative path -> some/relative/directory"));
     }
 }
