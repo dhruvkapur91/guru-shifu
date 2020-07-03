@@ -1,15 +1,33 @@
 package org.dhruvk.rectangle;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 
-public class ShouldHaveCreatedRectangleClass implements Rule  {
+public class ShouldHaveCreatedRectangleClass implements Rule {
 
-    public ShouldHaveCreatedRectangleClass(Path sourcePath) {
+    private final Path sourcePath;
+
+    public ShouldHaveCreatedRectangleClass(Path sourceAbsolutePath) {
+        this.sourcePath = sourceAbsolutePath;
     }
 
     @Override
     public Optional<String> suggestionKey() {
+        try {
+            long count = Files.walk(sourcePath) // Todo - better name?
+                    .filter(Files::isRegularFile)
+                    .filter(file -> file.endsWith("Rectangle.java"))
+                    .count();
+            if (count == 1) {
+                return Optional.empty();
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e); // This logic of traversing a path and figuring out if the file is present should likely be extracted out...
+        }
+
+
         return Optional.of("NO_JAVA_FILE_FOUND");
     }
 }
