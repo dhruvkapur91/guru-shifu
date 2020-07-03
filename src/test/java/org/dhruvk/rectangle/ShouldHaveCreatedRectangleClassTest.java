@@ -22,18 +22,24 @@ class ShouldHaveCreatedRectangleClassTest {
 
     @Test
     void shouldFailOnDirectoryContainingNoJavaFiles() {
-        Rule shouldHaveCreatedRectangleClass = new ShouldHaveCreatedRectangleClass(directoryWithNoJavaFiles);
-
-        Optional<String> expected = Optional.of("NO_JAVA_FILE_FOUND");
-
-        assertThat(shouldHaveCreatedRectangleClass.suggestionKey(), is(expected)); // TODO - is it possible to get this as a key from resource bundle to prevent hardcoding...?
+        assertThat(findFeedbackFor(directoryWithNoJavaFiles), is(Optional.of("NO_JAVA_FILE_FOUND"))); // TODO - is it possible to get this as a key from resource bundle to prevent hardcoding...?
     }
 
     @Test
     void shouldPassOnDirectoryContainingRectangleClassFile() {
-        Rule shouldHaveCreatedRectangleClass = new ShouldHaveCreatedRectangleClass(directoryWithOnlyRectangleFile);
+        assertThat(findFeedbackFor(directoryWithOnlyRectangleFile), is(Optional.empty()));
+    }
 
-        assertThat(shouldHaveCreatedRectangleClass.suggestionKey(), is(Optional.empty()));
+    @Test
+    void shouldFailOnDirectoryContainingUnnecessaryClassFile() {
+        Optional<String> expected = Optional.of("UNNECESSARY_FILES_FOUND");
+        assertThat(findFeedbackFor(directoryWithRectanglePlusUnnecessaryFiles), is(expected));
+    }
+
+    @Test
+    void shouldFailIfNameOfTheClassDoesNotFollowJavaConventions() {
+        Optional<String> expected = Optional.of("JAVA_FILE_NAMING_CONVENTIONS_NOT_FOLLOWED");
+        assertThat(findFeedbackFor(directoryWithOnlyRectangleFileWithoutFollowingConventions), is(expected));
     }
 
     @Test
@@ -42,19 +48,7 @@ class ShouldHaveCreatedRectangleClassTest {
         assertThat(assertionError.getMessage(), is("Expected absolute path, but looks like you passed a relative path -> some/relative/directory"));
     }
 
-    @Test
-    void shouldFailOnDirectoryContainingUnnecessaryClassFile() {
-        Rule shouldHaveCreatedRectangleClass = new ShouldHaveCreatedRectangleClass(directoryWithRectanglePlusUnnecessaryFiles);
-
-        Optional<String> expected = Optional.of("UNNECESSARY_FILES_FOUND");
-
-        assertThat(shouldHaveCreatedRectangleClass.suggestionKey(), is(expected));
-    }
-
-    @Test
-    void shouldFailIfNameOfTheClassDoesNotFollowJavaConventions() {
-        Rule shouldHaveCreatedRectangleClass = new ShouldHaveCreatedRectangleClass(directoryWithOnlyRectangleFileWithoutFollowingConventions);
-        Optional<String> expected = Optional.of("JAVA_FILE_NAMING_CONVENTIONS_NOT_FOLLOWED");
-        assertThat(shouldHaveCreatedRectangleClass.suggestionKey(), is(expected));
+    Optional<String> findFeedbackFor(Path path) {
+        return new ShouldHaveCreatedRectangleClass(path).suggestionKey();
     }
 }
