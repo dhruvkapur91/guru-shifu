@@ -1,9 +1,11 @@
 package org.dhruvk.rectangle;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Optional;
 
 import static java.nio.file.Paths.get;
@@ -31,5 +33,10 @@ class ShouldHaveCreatedRectangleClassTest {
         Rule shouldHaveCreatedRectangleClass = new ShouldHaveCreatedRectangleClass(directoryWithOnlyRectangleFile);
 
         assertThat(shouldHaveCreatedRectangleClass.suggestionKey(), is(Optional.empty()));
+    }
+
+    @Test
+    void shouldRequireThatTheClientSendsAnAbsolutePath() {
+        Assertions.assertThrows(AssertionError.class, () -> new ShouldHaveCreatedRectangleClass(Paths.get("some/relative/directory")));
     }
 }

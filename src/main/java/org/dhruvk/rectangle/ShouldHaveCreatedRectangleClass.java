@@ -10,6 +10,7 @@ public class ShouldHaveCreatedRectangleClass implements Rule {
     private final Path sourcePath;
 
     public ShouldHaveCreatedRectangleClass(Path sourceAbsolutePath) {
+        assert sourceAbsolutePath.startsWith("/") : "Expected absolute path, but looks like you passed a relative path -> " + sourceAbsolutePath;
         this.sourcePath = sourceAbsolutePath;
     }
 
