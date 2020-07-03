@@ -19,8 +19,7 @@ class ShouldHaveCreatedRectangleClassTest {
 //     TODO - unable to add test for empty directory as git won't add it?
 
     @Test
-    void shouldFailOnDirectoryContainingNoJavaFiles() throws IOException {
-
+    void shouldFailOnDirectoryContainingNoJavaFiles() {
         Rule shouldHaveCreatedRectangleClass = new ShouldHaveCreatedRectangleClass(directoryWithNoJavaFiles);
 
         Optional<String> expected = Optional.of("NO_JAVA_FILE_FOUND");
