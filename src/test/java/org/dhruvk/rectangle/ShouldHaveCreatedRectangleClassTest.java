@@ -41,8 +41,14 @@ class ShouldHaveCreatedRectangleClassTest {
     }
 
     @Test
-    void shouldGiveFeedbackForIfNameOfTheClassDoesNotFollowJavaConventions(@TempDir File someFile) throws Exception {
+    void shouldGiveFeedbackForIfNameOfTheClassDoesNotFollowJavaConventionsBecauseItDoesNotStartWithCapitalLetter(@TempDir File someFile) throws Exception {
         Path path = setupDirectoryStructure(someFile, "org/dhruvk/rectangle", "rectangle.java");
+        assertThat(findFeedbackFor(path), is(Set.of("JAVA_FILE_NAMING_CONVENTIONS_NOT_FOLLOWED")));
+    }
+
+    @Test
+    void shouldGiveFeedbackForIfNameOfTheClassDoesNotFollowJavaConventionsBecauseItUsesSnakeCase(@TempDir File someFile) throws Exception {
+        Path path = setupDirectoryStructure(someFile, "org/dhruvk/rectangle", "Rectangle_Area.java");
         assertThat(findFeedbackFor(path), is(Set.of("JAVA_FILE_NAMING_CONVENTIONS_NOT_FOLLOWED")));
     }
 
@@ -61,7 +67,7 @@ class ShouldHaveCreatedRectangleClassTest {
     @Test
     void shouldGiveFeedbackIsTheClassNameContainsWordShapeEvenIfItsLowerCase(@TempDir File someFile) throws Exception {
         Path path = setupDirectoryStructure(someFile, "org/dhruvk/rectangle", "Rectangle_shape.java");
-        assertThat(findFeedbackFor(path), is(Set.of("POSSIBLE_OVER_GENERALIZATION")));
+        assertThat(findFeedbackFor(path), containsInAnyOrder("POSSIBLE_OVER_GENERALIZATION","JAVA_FILE_NAMING_CONVENTIONS_NOT_FOLLOWED"));
     }
 
     @Test
@@ -73,7 +79,7 @@ class ShouldHaveCreatedRectangleClassTest {
     @Test
     void shouldGiveFeedbackIsTheClassNameContainsWordCalculatorEvenInWeirdCasing(@TempDir File someFile) throws Exception {
         Path path = setupDirectoryStructure(someFile,  "org/dhruvk/rectangle", "Rectangle_Area_CalcuLator.java");
-        assertThat(findFeedbackFor(path), is(Set.of("AVOID_MANAGER_CLASSES")));
+        assertThat(findFeedbackFor(path), containsInAnyOrder("AVOID_MANAGER_CLASSES","JAVA_FILE_NAMING_CONVENTIONS_NOT_FOLLOWED"));
     }
 
     @Test

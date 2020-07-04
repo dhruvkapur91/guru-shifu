@@ -3,9 +3,7 @@ package org.dhruvk.rectangle;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -27,6 +25,7 @@ public class ShouldHaveCreatedRectangleClass implements Rule {
         try {
             if (moreThanOneFileExists()) feedbacks.add("UNNECESSARY_FILES_FOUND");
             if (lowerCaseClassFilesFound()) feedbacks.add("JAVA_FILE_NAMING_CONVENTIONS_NOT_FOLLOWED");
+            if (hasUsedSnakeCaseInNaming()) feedbacks.add("JAVA_FILE_NAMING_CONVENTIONS_NOT_FOLLOWED");
             if (noJavaFileFound()) feedbacks.add("NO_JAVA_FILE_FOUND");
             if (doesRectangleClassExist()) feedbacks.add("FOUND_RECTANGLE_CLASS");
             if (possibleOverGeneralization()) feedbacks.add("POSSIBLE_OVER_GENERALIZATION");
@@ -42,6 +41,13 @@ public class ShouldHaveCreatedRectangleClass implements Rule {
                 .filter(Files::isRegularFile)
                 .filter(isJavaFile())
                 .anyMatch(fileStartsWithALowerCase());
+    }
+
+    private boolean hasUsedSnakeCaseInNaming() throws IOException {
+        return Files.walk(absoluteSourcePath)
+                .filter(Files::isRegularFile)
+                .filter(isJavaFile())
+                .anyMatch(file -> file.getFileName().toString().contains("_"));
     }
 
     private boolean noJavaFileFound() throws IOException { // TODO - wait for removing the duplication of the Files API... lets see enough of it to understand what will be a good abstraction
