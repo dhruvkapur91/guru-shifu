@@ -1,6 +1,7 @@
 package org.dhruvk.rectangle;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -16,7 +17,7 @@ import java.util.Optional;
 
 import static java.nio.file.Paths.get;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ShouldHaveCreatedRectangleClassTest {
@@ -60,6 +61,14 @@ class ShouldHaveCreatedRectangleClassTest {
     void shouldRequireThatTheClientSendsAnAbsolutePath() {
         AssertionError assertionError = Assertions.assertThrows(AssertionError.class, () -> new ShouldHaveCreatedRectangleClass(get("some/relative/directory")));
         assertThat(assertionError.getMessage(), is("Expected absolute path, but looks like you passed a relative path -> some/relative/directory"));
+    }
+
+    @Test
+    void shouldReportAllProblems(@TempDir File someFile) throws Exception {
+        Path path = setupDirectoryStructure(someFile, "org/dhruvk/rectangle", "rect.java");
+        setupDirectoryStructure(someFile, "org/dhruvk/rectangle", "Blah.java");
+        setupDirectoryStructure(someFile, "org/dhruvk/rectangle", "Rectangle.java");
+        assertThat(findFeedbackFor(path), containsInAnyOrder("UNNECESSARY_FILES_FOUND","FOUND_RECTANGLE_CLASS","JAVA_FILE_NAMING_CONVENTIONS_NOT_FOLLOWED"));
     }
 
     List<String> findFeedbackFor(Path path) {
