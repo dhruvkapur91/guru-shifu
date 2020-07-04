@@ -112,8 +112,8 @@ public class RectangleClassFeedbackTest {
         String sourceCode = """
                 class Rectangle {
                                 
-                   int length;
-                   int breath;
+                   final int length;
+                   final int breath;
                    
                    public Rectangle(int length, int breath) {}
                                 
@@ -132,7 +132,7 @@ public class RectangleClassFeedbackTest {
         String sourceCode = """
                 class Rectangle {
                                 
-                   private int area;
+                   final private int area;
                    
                    public Rectangle(int length, int breath) {
                         this.area = length * breath;
@@ -156,8 +156,8 @@ public class RectangleClassFeedbackTest {
         String sourceCode = """
                 class Rectangle {
                                 
-                   private int rectangle_length;
-                   private int rectangle_breath;
+                   private final int rectangle_length;
+                   private final int rectangle_breath;
                    
                    public Rectangle(int length, int breath) {
                         this.area = length * breath;
@@ -178,12 +178,38 @@ public class RectangleClassFeedbackTest {
     }
 
     @Test
+    void shouldGiveFeedbackIfFieldsAreNotFinal() {
+        String sourceCode = """
+                class Rectangle {
+                                
+                   private int length;
+                   private int breath;
+                   private int area;
+                   
+                   public Rectangle(int length, int breath) {
+                        this.area = length * breath;
+                   }
+                                
+                   public int area() {
+                    return area;
+                   }
+                }
+                """;
+
+        Set<String> feedbacks = new RectangleClassFeedback(sourceCode).suggestionKey();
+        assertThat(feedbacks, containsInAnyOrder(
+                "FIELDS_CAN_BE_FINAL"
+        ));
+    }
+
+
+    @Test
     void shouldGiveFeedbackIfMethodsNameBreakEncapsulation() {
         String sourceCodeWithGet = """
                 class Rectangle {
                                 
-                   int length;
-                   int breath;
+                   final int length;
+                   final int breath;
                    
                    public Rectangle(int length, int breath) {}
                                 
@@ -194,8 +220,8 @@ public class RectangleClassFeedbackTest {
         String sourceCodeWithCalculate = """
                 class Rectangle {
                                 
-                   int length;
-                   int breath;
+                   final int length;
+                   final int breath;
                    
                    public Rectangle(int length, int breath) {}
                                 
@@ -227,7 +253,7 @@ public class RectangleClassFeedbackTest {
         String sourceCode = """
                 class Rectangle {
                                 
-                   private int area;
+                   private final int area;
                    
                    public Rectangle(int length, int breath) {}
                                 
@@ -245,9 +271,9 @@ public class RectangleClassFeedbackTest {
         String sourceCode = """
                 class Rectangle {
                                 
-                   private int area;
-                   private int length;
-                   private int breath;
+                   private final int area;
+                   private final int length;
+                   private final int breath;
                    
                    public Rectangle(int length, int breath) {}
                                 

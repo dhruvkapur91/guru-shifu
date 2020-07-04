@@ -14,6 +14,7 @@ class RectangleCodeMetrics {
 
     private static final String NO_CLASS_FOUND = "NO_CLASS_FOUND";
     private static final String NO_CONSTRUCTOR_FOUND = "NO_CONSTRUCTOR_FOUND";
+    private static final String FIELDS_CAN_BE_FINAL = "FIELDS_CAN_BE_FINAL";
     private static final String NO_CONSTRUCTOR_PARAMETER = "NO_CONSTRUCTOR_PARAMETER";
     private static final String ONLY_ONE_CONSTRUCTOR_PARAMETER = "ONLY_ONE_CONSTRUCTOR_PARAMETER";
     private static final String TOO_MANY_CONSTRUCTOR_PARAMETER = "TOO_MANY_CONSTRUCTOR_PARAMETER";
@@ -74,6 +75,10 @@ class RectangleCodeMetrics {
     public void incrementNumberOfFields() {
         feedbacks.remove(NO_FIELDS_FOUND);
     }
+
+    public void markSomeFieldIsNotFinal() {
+        feedbacks.add(FIELDS_CAN_BE_FINAL);
+    }
 }
 
 class GetFeedback extends VoidVisitorAdapter<RectangleCodeMetrics> {
@@ -95,6 +100,7 @@ class GetFeedback extends VoidVisitorAdapter<RectangleCodeMetrics> {
     public void visit(FieldDeclaration someField, RectangleCodeMetrics arg) {
         super.visit(someField, arg);
         boolean containsUnderscore = someField.toString().toLowerCase().contains("_");
+        if (!someField.isFinal()) arg.markSomeFieldIsNotFinal();
         if (!someField.isPrivate()) arg.markHasSomeNonPrivateFields();
         if (containsUnderscore) arg.markSomeFieldBreaksJavaConventions();
         arg.incrementNumberOfFields();
