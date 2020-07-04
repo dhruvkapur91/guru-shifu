@@ -20,6 +20,7 @@ class CodeMetrics {
     private int numberOfFields = 0;
     private boolean someFieldBreaksJavaConventions = false;
     private boolean someMethodBreaksJavaConventions = false;
+    private boolean someMethodNameBreaksEncapsulation = false;
 
     public void setHasDefinedClass() {
         this.hasDefinedClass = true;
@@ -45,6 +46,10 @@ class CodeMetrics {
         someFieldBreaksJavaConventions = true;
     }
 
+    public void markSomeMethodNameBreaksEncapsulation() {
+        someMethodNameBreaksEncapsulation = true;
+    }
+
     public void markSomeMethodBreaksJavaConventions() {
         someMethodBreaksJavaConventions = true;
     }
@@ -67,6 +72,10 @@ class CodeMetrics {
 
     public boolean doesAMethodBreaksJavaConventions() {
         return someMethodBreaksJavaConventions;
+    }
+
+    public boolean doesAMethodNameBreaksJavaEncapsulation() {
+        return someMethodNameBreaksEncapsulation;
     }
 
     public int getNumberOfFields() {
@@ -107,16 +116,9 @@ class GetFeedback extends VoidVisitorAdapter<CodeMetrics> {
         super.visit(someMethod, arg);
         boolean containsUnderscore = someMethod.toString().toLowerCase().contains("_");
         if (containsUnderscore) arg.markSomeMethodBreaksJavaConventions();
-    }
-}
-
-class MethodNamesShouldNotBreakEncapsulation extends VoidVisitorAdapter<AtomicBoolean> {
-    @Override
-    public void visit(MethodDeclaration someMethod, AtomicBoolean arg) {
-        super.visit(someMethod, arg);
         boolean containsGet = someMethod.getNameAsString().toLowerCase().contains("get");
         boolean containsCalculate = someMethod.getNameAsString().toLowerCase().contains("calculate");
-        if (containsGet || containsCalculate) arg.set(true);
+        if (containsGet || containsCalculate) arg.markSomeMethodNameBreaksEncapsulation();
     }
 }
 
@@ -151,7 +153,7 @@ public class RectangleClassFeedback implements Rule {
 
         if (codeMetrics.hasSomeNonPrivateFields()) feedbacks.add("FIELDS_SHOULD_BE_PRIVATE");
 
-        if (methodsBreakEncapsulation(compilationUnit)) feedbacks.add("METHOD_NAME_BREAKS_ENCAPSULATION");
+        if (codeMetrics.doesAMethodNameBreaksJavaEncapsulation()) feedbacks.add("METHOD_NAME_BREAKS_ENCAPSULATION");
         if (codeMetrics.doesAMethodBreaksJavaConventions())
             feedbacks.add("JAVA_METHOD_NAMING_CONVENTIONS_NOT_FOLLOWED");
         if (codeMetrics.doesAFieldBreaksJavaConventions())
@@ -160,9 +162,4 @@ public class RectangleClassFeedback implements Rule {
         return feedbacks.isEmpty() ? Set.of("UNKNOWN_SCENARIO") : feedbacks;
     }
 
-    private Boolean methodsBreakEncapsulation(CompilationUnit compilationUnit) {
-        AtomicBoolean doesMethodsBreakEncapsulation = new AtomicBoolean(false);
-        new MethodNamesShouldNotBreakEncapsulation().visit(compilationUnit, doesMethodsBreakEncapsulation);
-        return doesMethodsBreakEncapsulation.get();
-    }
 }
