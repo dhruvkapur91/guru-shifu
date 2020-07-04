@@ -29,6 +29,7 @@ public class ShouldHaveCreatedRectangleClass implements Rule {
             if (lowerCaseClassFilesFound()) feedbacks.add("JAVA_FILE_NAMING_CONVENTIONS_NOT_FOLLOWED");
             if (noJavaFileFound()) feedbacks.add("NO_JAVA_FILE_FOUND");
             if (doesRectangleClassExist()) feedbacks.add("FOUND_RECTANGLE_CLASS");
+            if (possibleOverGeneralization()) feedbacks.add("POSSIBLE_OVER_GENERALIZATION");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -58,6 +59,12 @@ public class ShouldHaveCreatedRectangleClass implements Rule {
         return Files.walk(absoluteSourcePath)
                 .filter(Files::isRegularFile)
                 .anyMatch(file -> file.endsWith("Rectangle.java"));
+    }
+
+    private boolean possibleOverGeneralization() throws IOException {
+        return Files.walk(absoluteSourcePath)
+                .filter(Files::isRegularFile)
+                .anyMatch(file -> file.getFileName().toString().contains("Shape"));
     }
 
     private Predicate<Path> fileStartsWithALowerCase() {
