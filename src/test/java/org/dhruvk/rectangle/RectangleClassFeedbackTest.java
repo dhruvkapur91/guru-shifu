@@ -130,7 +130,7 @@ public class RectangleClassFeedbackTest {
 
     @Test
     void shouldGiveFeedbackIfMethodsNameBreakEncapsulation() {
-        String sourceCode = """
+        String sourceCodeWithGet = """
                 class Rectangle {
                 
                    int length;
@@ -142,7 +142,25 @@ public class RectangleClassFeedbackTest {
                 }
                 """;
 
-        Set<String> feedbacks = new RectangleClassFeedback(sourceCode).suggestionKey();
+        String sourceCodeWithCalculate = """
+                class Rectangle {
+                
+                   int length;
+                   int breath;
+                   
+                   public Rectangle(int length, int breath) {}
+                                
+                   public double calculateArea() {}
+                }
+                """;
+
+        Set<String> feedbacks = new RectangleClassFeedback(sourceCodeWithGet).suggestionKey();
+        assertThat(feedbacks, containsInAnyOrder(
+                "FIELDS_SHOULD_BE_PRIVATE",
+                "METHOD_NAME_BREAKS_ENCAPSULATION"
+        ));
+
+        feedbacks = new RectangleClassFeedback(sourceCodeWithCalculate).suggestionKey();
         assertThat(feedbacks, containsInAnyOrder(
                 "FIELDS_SHOULD_BE_PRIVATE",
                 "METHOD_NAME_BREAKS_ENCAPSULATION"

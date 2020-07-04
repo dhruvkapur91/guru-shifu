@@ -56,7 +56,9 @@ class MethodNamesShouldNotBreakEncapsulation extends VoidVisitorAdapter<AtomicBo
     @Override
     public void visit(MethodDeclaration someMethod, AtomicBoolean arg) {
         super.visit(someMethod, arg);
-        if(someMethod.getNameAsString().toLowerCase().contains("get")) arg.set(true);
+        boolean containsGet = someMethod.getNameAsString().toLowerCase().contains("get");
+        boolean containsCalculate = someMethod.getNameAsString().toLowerCase().contains("calculate");
+        if(containsGet || containsCalculate) arg.set(true);
     }
 }
 
