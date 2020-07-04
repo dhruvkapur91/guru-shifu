@@ -53,18 +53,10 @@ public class ShouldHaveCreatedRectangleClass implements Rule {
                 .noneMatch(isJavaFile());
     }
 
-    private boolean moreThanOneFileExists() {
-        try {
-            long numberOfFiles = Files.walk(absoluteSourcePath)
-                    .filter(Files::isRegularFile)
-                    .count();
-            if (numberOfFiles > 1) {
-                return true;
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e); // This logic of traversing a path and figuring out if the file is present should likely be extracted out...
-        }
-        return false;
+    private boolean moreThanOneFileExists() throws IOException {
+        return Files.walk(absoluteSourcePath)
+                .filter(Files::isRegularFile)
+                .count() > 1;
     }
 
     private Predicate<Path> isJavaFile() {
