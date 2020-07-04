@@ -47,23 +47,12 @@ public class ShouldHaveCreatedRectangleClass implements Rule {
         };
     }
 
-    private boolean noJavaFileFound() { // TODO - wait for removing the duplication of the Files API... lets see enough of it to understand what will be a good abstraction
-        try {
-            long numberOfJavaFiles = Files.walk(absoluteSourcePath)
-                    .filter(Files::isRegularFile)
-                    .filter(isJavaFile())
-                    .count();
-            if (numberOfJavaFiles == 0) {
-                return true;
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e); // This logic of traversing a path and figuring out if the file is present should likely be extracted out...
-        }
-        return false;
-    }
-
-    private Predicate<Path> isJavaFile() {
-        return file -> getExtension(file.toString()).equals("java");
+    private boolean noJavaFileFound() throws IOException { // TODO - wait for removing the duplication of the Files API... lets see enough of it to understand what will be a good abstraction
+        long numberOfJavaFiles = Files.walk(absoluteSourcePath)
+                .filter(Files::isRegularFile)
+                .filter(isJavaFile())
+                .count();
+        return numberOfJavaFiles == 0;
     }
 
     private boolean moreThanOneFileExists() {
@@ -78,6 +67,10 @@ public class ShouldHaveCreatedRectangleClass implements Rule {
             throw new RuntimeException(e); // This logic of traversing a path and figuring out if the file is present should likely be extracted out...
         }
         return false;
+    }
+
+    private Predicate<Path> isJavaFile() {
+        return file -> getExtension(file.toString()).equals("java");
     }
 
     private boolean doesRectangleClassExist() {
