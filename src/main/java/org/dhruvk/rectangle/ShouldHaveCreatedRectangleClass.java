@@ -10,11 +10,11 @@ import static org.apache.commons.io.FilenameUtils.getExtension;
 
 public class ShouldHaveCreatedRectangleClass implements Rule {
 
-    private final Path sourcePath;
+    private final Path absoluteSourcePath;
 
     public ShouldHaveCreatedRectangleClass(Path sourceAbsolutePath) {
         assert sourceAbsolutePath.startsWith("/") : "Expected absolute path, but looks like you passed a relative path -> " + sourceAbsolutePath;
-        this.sourcePath = sourceAbsolutePath;
+        this.absoluteSourcePath = sourceAbsolutePath;
     }
 
     @Override
@@ -28,7 +28,7 @@ public class ShouldHaveCreatedRectangleClass implements Rule {
 
     private boolean lowerCaseClassFilesFound() {
         try {
-            long count = Files.walk(sourcePath)
+            long count = Files.walk(absoluteSourcePath)
                     .filter(Files::isRegularFile)
                     .filter(file -> getExtension(file.toString()).equals("java"))
                     .filter(file -> Pattern.compile("[a-z]+.*").matcher(file.getFileName().toString()).matches())
@@ -44,7 +44,7 @@ public class ShouldHaveCreatedRectangleClass implements Rule {
 
     private boolean noJavaFileFound() { // TODO - wait for removing the duplication of the Files API... lets see enough of it to understand what will be a good abstraction
         try {
-            long count = Files.walk(sourcePath)
+            long count = Files.walk(absoluteSourcePath)
                     .filter(Files::isRegularFile)
                     .filter(file -> getExtension(file.toString()).equals("java"))
                     .count();
@@ -59,7 +59,7 @@ public class ShouldHaveCreatedRectangleClass implements Rule {
 
     private boolean moreThanOneFileExists() {
         try {
-            long count = Files.walk(sourcePath)
+            long count = Files.walk(absoluteSourcePath)
                     .filter(Files::isRegularFile)
                     .count();
             if (count > 1) {
@@ -73,7 +73,7 @@ public class ShouldHaveCreatedRectangleClass implements Rule {
 
     private boolean doesRectangleClassExist() {
         try {
-            long count = Files.walk(sourcePath) // Todo - better name?
+            long count = Files.walk(absoluteSourcePath) // Todo - better name?
                     .filter(Files::isRegularFile)
                     .filter(file -> file.endsWith("Rectangle.java"))
                     .count();
