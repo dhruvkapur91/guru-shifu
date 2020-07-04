@@ -30,9 +30,9 @@ class ShouldHaveCreatedRectangleClassTest {
     }
 
     @Test
-    void shouldGiveNoFeedbackForDirectoryContainingRectangleClassFile(@TempDir File someFile) throws Exception {
+    void shouldGivePositiveFeedbackForDirectoryContainingRectangleClassFile(@TempDir File someFile) throws Exception {
         Path path = setupDirectoryStructure(someFile, "org/dhruvk/rectangle", "Rectangle.java");
-        assertThat(findFeedbackFor(path), is(List.of()));
+        assertThat(findFeedbackFor(path), is(List.of("FOUND_RECTANGLE_CLASS")));
     }
 
     @Test

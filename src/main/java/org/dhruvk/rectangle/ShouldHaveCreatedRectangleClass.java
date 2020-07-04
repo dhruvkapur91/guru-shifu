@@ -26,7 +26,7 @@ public class ShouldHaveCreatedRectangleClass implements Rule {
             if (moreThanOneFileExists()) return List.of("UNNECESSARY_FILES_FOUND");
             if (lowerCaseClassFilesFound()) return List.of("JAVA_FILE_NAMING_CONVENTIONS_NOT_FOLLOWED");
             if (noJavaFileFound()) return List.of("NO_JAVA_FILE_FOUND");
-            if (doesRectangleClassExist()) return List.of();
+            if (doesRectangleClassExist()) return List.of("FOUND_RECTANGLE_CLASS");
             return List.of("UNKNOWN_SCENARIO");
         } catch (IOException e) {
             throw new RuntimeException(e);
