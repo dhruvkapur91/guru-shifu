@@ -11,12 +11,26 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-class ThereShouldBeAClass extends VoidVisitorAdapter<AtomicBoolean> {
-    @Override
-    public void visit(ClassOrInterfaceDeclaration n, AtomicBoolean arg) {
-        super.visit(n, arg);
-        arg.set(true);
+class CodeMetrics {
+
+    private boolean hasDefinedClass = false;
+
+    public void setHasDefinedClass() {
+        this.hasDefinedClass = true;
     }
+
+    public boolean isClassDefined() {
+        return hasDefinedClass;
+    }
+}
+
+class GetFeedback extends VoidVisitorAdapter<CodeMetrics> {
+    @Override
+    public void visit(ClassOrInterfaceDeclaration n, CodeMetrics metrics) {
+        super.visit(n, metrics);
+        metrics.setHasDefinedClass();
+    }
+
 }
 
 class ShouldHaveConstructor extends VoidVisitorAdapter<AtomicBoolean> {
@@ -93,10 +107,15 @@ public class RectangleClassFeedback implements Rule {
 
     @Override
     public Set<String> suggestionKey() {
+
+
         Set<String> feedbacks = new HashSet<>();
+        CodeMetrics codeMetrics = new CodeMetrics();
         CompilationUnit compilationUnit = StaticJavaParser.parse(sourceCode);
 
-        if(!hasOneClass(compilationUnit)) feedbacks.add("NO_CLASS_FOUND");
+        new GetFeedback().visit(compilationUnit, codeMetrics);
+
+        if(!codeMetrics.isClassDefined()) feedbacks.add("NO_CLASS_FOUND");
 
         int numberOfConstructorParameters = numberOfConstructorParameters(compilationUnit);
 
@@ -125,12 +144,6 @@ public class RectangleClassFeedback implements Rule {
     private boolean fieldNamesBreakJavaConventions(CompilationUnit compilationUnit) {
         AtomicBoolean hasAClass = new AtomicBoolean(false);
         new FieldNamesShouldFollowJavaConventions().visit(compilationUnit, hasAClass);
-        return hasAClass.get();
-    }
-
-    private boolean hasOneClass(CompilationUnit compilationUnit) {
-        AtomicBoolean hasAClass = new AtomicBoolean(false);
-        new ThereShouldBeAClass().visit(compilationUnit, hasAClass);
         return hasAClass.get();
     }
 
