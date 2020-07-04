@@ -7,6 +7,7 @@ import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -32,10 +33,16 @@ public class RectangleClassFeedback implements Rule {
 
     @Override
     public Set<String> suggestionKey() {
+        Set<String> feedbacks = new HashSet<>();
+
         CompilationUnit compilationUnit = StaticJavaParser.parse(sourceCode);
         AtomicBoolean hasConstructor = new AtomicBoolean(false);
         new ShouldHaveConstructor().visit(compilationUnit,hasConstructor);
 
-        return hasConstructor.get() ? Set.of("UNKNOWN_SCENARIO") : Set.of("NO_CONSTRUCTOR_FOUND");
+        if(!hasConstructor.get()) {
+            feedbacks.add("NO_CONSTRUCTOR_FOUND");
+        }
+
+        return feedbacks.isEmpty() ? Set.of("UNKNOWN_SCENARIO") : feedbacks;
     }
 }
