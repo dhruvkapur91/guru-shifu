@@ -38,7 +38,7 @@ class NumberOfFields extends VoidVisitorAdapter<AtomicInteger> {
     }
 }
 
-class AllFieldsShouldBePrivate extends VoidVisitorAdapter<AtomicBoolean> {
+class IsAnyFieldPublic extends VoidVisitorAdapter<AtomicBoolean> {
     @Override
     public void visit(FieldDeclaration someField, AtomicBoolean arg) {
         super.visit(someField, arg);
@@ -96,7 +96,7 @@ public class RectangleClassFeedback implements Rule {
         int numberOfFields = numberOfFields(compilationUnit);
         AtomicBoolean hasPublicFields = new AtomicBoolean(false);
         if (numberOfFields > 0) {
-            new AllFieldsShouldBePrivate().visit(compilationUnit, hasPublicFields);
+            new IsAnyFieldPublic().visit(compilationUnit, hasPublicFields);
         }
         return hasPublicFields.get();
     }
