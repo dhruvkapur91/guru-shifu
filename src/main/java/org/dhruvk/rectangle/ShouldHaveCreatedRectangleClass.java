@@ -63,18 +63,9 @@ public class ShouldHaveCreatedRectangleClass implements Rule {
         return file -> getExtension(file.toString()).equals("java");
     }
 
-    private boolean doesRectangleClassExist() {
-        try {
-            long count = Files.walk(absoluteSourcePath) // Todo - better name?
-                    .filter(Files::isRegularFile)
-                    .filter(file -> file.endsWith("Rectangle.java"))
-                    .count();
-            if (count == 1) {
-                return true;
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e); // This logic of traversing a path and figuring out if the file is present should likely be extracted out...
-        }
-        return false;
+    private boolean doesRectangleClassExist() throws IOException {
+        return Files.walk(absoluteSourcePath)
+                .filter(Files::isRegularFile)
+                .anyMatch(file -> file.endsWith("Rectangle.java"));
     }
 }
