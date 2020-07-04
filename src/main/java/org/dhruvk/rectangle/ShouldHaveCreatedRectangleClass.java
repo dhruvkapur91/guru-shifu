@@ -40,13 +40,6 @@ public class ShouldHaveCreatedRectangleClass implements Rule {
                 .anyMatch(fileStartsWithALowerCase());
     }
 
-    private Predicate<Path> fileStartsWithALowerCase() {
-        return file -> {
-            String lowerCaseRegex = "[a-z]+.*";
-            return Pattern.compile(lowerCaseRegex).matcher(file.getFileName().toString()).matches();
-        };
-    }
-
     private boolean noJavaFileFound() throws IOException { // TODO - wait for removing the duplication of the Files API... lets see enough of it to understand what will be a good abstraction
         return Files.walk(absoluteSourcePath)
                 .filter(Files::isRegularFile)
@@ -59,13 +52,20 @@ public class ShouldHaveCreatedRectangleClass implements Rule {
                 .count() > 1;
     }
 
-    private Predicate<Path> isJavaFile() {
-        return file -> getExtension(file.toString()).equals("java");
-    }
-
     private boolean doesRectangleClassExist() throws IOException {
         return Files.walk(absoluteSourcePath)
                 .filter(Files::isRegularFile)
                 .anyMatch(file -> file.endsWith("Rectangle.java"));
+    }
+
+    private Predicate<Path> fileStartsWithALowerCase() {
+        return file -> {
+            String lowerCaseRegex = "[a-z]+.*";
+            return Pattern.compile(lowerCaseRegex).matcher(file.getFileName().toString()).matches();
+        };
+    }
+
+    private Predicate<Path> isJavaFile() {
+        return file -> getExtension(file.toString()).equals("java");
     }
 }
