@@ -20,7 +20,6 @@ public class RectangleClassFeedbackTest {
         Set<String> feedbacks = new RectangleClassFeedback("").suggestionKey();
         assertThat(feedbacks, containsInAnyOrder(
                 "NO_CONSTRUCTOR_FOUND",
-                "NO_CONSTRUCTOR_PARAMETER",
                 "NO_FIELDS_FOUND",
                 "NO_CLASS_FOUND"
         ));
@@ -37,7 +36,6 @@ public class RectangleClassFeedbackTest {
         Set<String> feedbacks = new RectangleClassFeedback(sourceCode).suggestionKey();
         assertThat(feedbacks, containsInAnyOrder(
                 "NO_CONSTRUCTOR_FOUND",
-                "NO_CONSTRUCTOR_PARAMETER",
                 "NO_FIELDS_FOUND"
         ));
     }

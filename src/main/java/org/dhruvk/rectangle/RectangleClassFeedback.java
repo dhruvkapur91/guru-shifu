@@ -81,7 +81,7 @@ public class RectangleClassFeedback implements Rule {
         int numberOfConstructorParameters = numberOfConstructorParameters(compilationUnit);
 
         if (!hasConstructor(compilationUnit)) feedbacks.add("NO_CONSTRUCTOR_FOUND");
-        if (numberOfConstructorParameters == 0) feedbacks.add("NO_CONSTRUCTOR_PARAMETER");
+        if (hasConstructor(compilationUnit) && numberOfConstructorParameters == 0) feedbacks.add("NO_CONSTRUCTOR_PARAMETER");
         if (numberOfConstructorParameters == 1) feedbacks.add("ONLY_ONE_CONSTRUCTOR_PARAMETER");
         if (numberOfConstructorParameters > 2) feedbacks.add("TOO_MANY_CONSTRUCTOR_PARAMETER");
 
