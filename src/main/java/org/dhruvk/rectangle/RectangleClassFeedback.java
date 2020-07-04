@@ -14,11 +14,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 class CodeMetrics {
 
     private boolean hasDefinedClass = false;
-
     private int numberOfConstructorParameters = 0;
     private boolean hasSomeNonPrivateFields = false;
     private boolean hasConstructor = false;
     private int numberOfFields = 0;
+    private boolean someFieldBreaksJavaConventions = false;
+    private boolean someMethodBreaksJavaConventions = false;
 
     public void setHasDefinedClass() {
         this.hasDefinedClass = true;
@@ -40,6 +41,14 @@ class CodeMetrics {
         hasSomeNonPrivateFields = true;
     }
 
+    public void markSomeFieldBreaksJavaConventions() {
+        someFieldBreaksJavaConventions = true;
+    }
+
+    public void markSomeMethodBreaksJavaConventions() {
+        someMethodBreaksJavaConventions = true;
+    }
+
     public boolean hasSomeNonPrivateFields() {
         return hasSomeNonPrivateFields;
     }
@@ -50,6 +59,14 @@ class CodeMetrics {
 
     public boolean hasConstructor() {
         return hasConstructor;
+    }
+
+    public boolean doesAFieldBreaksJavaConventions() {
+        return someFieldBreaksJavaConventions;
+    }
+
+    public boolean doesAMethodBreaksJavaConventions() {
+        return someMethodBreaksJavaConventions;
     }
 
     public int getNumberOfFields() {
@@ -79,8 +96,17 @@ class GetFeedback extends VoidVisitorAdapter<CodeMetrics> {
     @Override
     public void visit(FieldDeclaration someField, CodeMetrics arg) {
         super.visit(someField, arg);
+        boolean containsUnderscore = someField.toString().toLowerCase().contains("_");
         if (!someField.isPrivate()) arg.markHasSomeNonPrivateFields();
+        if (containsUnderscore) arg.markSomeFieldBreaksJavaConventions();
         arg.incrementNumberOfFields();
+    }
+
+    @Override
+    public void visit(MethodDeclaration someMethod, CodeMetrics arg) {
+        super.visit(someMethod, arg);
+        boolean containsUnderscore = someMethod.toString().toLowerCase().contains("_");
+        if (containsUnderscore) arg.markSomeMethodBreaksJavaConventions();
     }
 }
 
@@ -92,26 +118,6 @@ class MethodNamesShouldNotBreakEncapsulation extends VoidVisitorAdapter<AtomicBo
         boolean containsCalculate = someMethod.getNameAsString().toLowerCase().contains("calculate");
         if (containsGet || containsCalculate) arg.set(true);
     }
-}
-
-class MethodNamesShouldFollowJavaConventions extends VoidVisitorAdapter<AtomicBoolean> {
-    @Override
-    public void visit(MethodDeclaration someMethod, AtomicBoolean arg) {
-        super.visit(someMethod, arg);
-        boolean containsUnderscore = someMethod.getNameAsString().toLowerCase().contains("_");
-        if (containsUnderscore) arg.set(true);
-    }
-}
-
-class FieldNamesShouldFollowJavaConventions extends VoidVisitorAdapter<AtomicBoolean> {
-
-    @Override
-    public void visit(FieldDeclaration n, AtomicBoolean arg) {
-        super.visit(n, arg);
-        boolean containsUnderscore = n.toString().toLowerCase().contains("_");
-        if (containsUnderscore) arg.set(true);
-    }
-
 }
 
 public class RectangleClassFeedback implements Rule {
@@ -146,24 +152,12 @@ public class RectangleClassFeedback implements Rule {
         if (codeMetrics.hasSomeNonPrivateFields()) feedbacks.add("FIELDS_SHOULD_BE_PRIVATE");
 
         if (methodsBreakEncapsulation(compilationUnit)) feedbacks.add("METHOD_NAME_BREAKS_ENCAPSULATION");
-        if (methodNamesBreakJavaConventions(compilationUnit))
+        if (codeMetrics.doesAMethodBreaksJavaConventions())
             feedbacks.add("JAVA_METHOD_NAMING_CONVENTIONS_NOT_FOLLOWED");
-        if (fieldNamesBreakJavaConventions(compilationUnit))
+        if (codeMetrics.doesAFieldBreaksJavaConventions())
             feedbacks.add("JAVA_FIELD_NAMING_CONVENTIONS_NOT_FOLLOWED");
 
         return feedbacks.isEmpty() ? Set.of("UNKNOWN_SCENARIO") : feedbacks;
-    }
-
-    private boolean methodNamesBreakJavaConventions(CompilationUnit compilationUnit) {
-        AtomicBoolean hasAClass = new AtomicBoolean(false);
-        new MethodNamesShouldFollowJavaConventions().visit(compilationUnit, hasAClass);
-        return hasAClass.get();
-    }
-
-    private boolean fieldNamesBreakJavaConventions(CompilationUnit compilationUnit) {
-        AtomicBoolean hasAClass = new AtomicBoolean(false);
-        new FieldNamesShouldFollowJavaConventions().visit(compilationUnit, hasAClass);
-        return hasAClass.get();
     }
 
     private Boolean methodsBreakEncapsulation(CompilationUnit compilationUnit) {
