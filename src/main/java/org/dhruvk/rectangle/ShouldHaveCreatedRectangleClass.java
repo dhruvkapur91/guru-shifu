@@ -48,11 +48,9 @@ public class ShouldHaveCreatedRectangleClass implements Rule {
     }
 
     private boolean noJavaFileFound() throws IOException { // TODO - wait for removing the duplication of the Files API... lets see enough of it to understand what will be a good abstraction
-        long numberOfJavaFiles = Files.walk(absoluteSourcePath)
+        return Files.walk(absoluteSourcePath)
                 .filter(Files::isRegularFile)
-                .filter(isJavaFile())
-                .count();
-        return numberOfJavaFiles == 0;
+                .noneMatch(isJavaFile());
     }
 
     private boolean moreThanOneFileExists() {
