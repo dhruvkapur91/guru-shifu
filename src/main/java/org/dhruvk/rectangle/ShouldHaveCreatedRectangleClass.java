@@ -64,7 +64,7 @@ public class ShouldHaveCreatedRectangleClass implements Rule {
     private boolean possibleOverGeneralization() throws IOException {
         return Files.walk(absoluteSourcePath)
                 .filter(Files::isRegularFile)
-                .anyMatch(file -> file.getFileName().toString().contains("Shape"));
+                .anyMatch(file -> file.getFileName().toString().toLowerCase().contains("shape"));
     }
 
     private Predicate<Path> fileStartsWithALowerCase() {

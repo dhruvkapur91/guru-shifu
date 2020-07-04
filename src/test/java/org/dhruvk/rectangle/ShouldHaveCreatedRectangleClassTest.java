@@ -47,8 +47,20 @@ class ShouldHaveCreatedRectangleClassTest {
     }
 
     @Test
-    void shouldGiveFeedbackIsTheClassNameContainsWordShape(@TempDir File someFile) throws Exception {
+    void shouldGiveFeedbackIsTheClassIsCalledShape(@TempDir File someFile) throws Exception {
         Path path = setupDirectoryStructure(someFile, "org/dhruvk/rectangle", "Shape.java");
+        assertThat(findFeedbackFor(path), is(Set.of("POSSIBLE_OVER_GENERALIZATION")));
+    }
+
+    @Test
+    void shouldGiveFeedbackIsTheClassNameContainsWordShape(@TempDir File someFile) throws Exception {
+        Path path = setupDirectoryStructure(someFile, "org/dhruvk/rectangle", "RectangleShape.java");
+        assertThat(findFeedbackFor(path), is(Set.of("POSSIBLE_OVER_GENERALIZATION")));
+    }
+
+    @Test
+    void shouldGiveFeedbackIsTheClassNameContainsWordShapeEvenIfItsLowerCase(@TempDir File someFile) throws Exception {
+        Path path = setupDirectoryStructure(someFile, "org/dhruvk/rectangle", "Rectangle_shape.java");
         assertThat(findFeedbackFor(path), is(Set.of("POSSIBLE_OVER_GENERALIZATION")));
     }
 
