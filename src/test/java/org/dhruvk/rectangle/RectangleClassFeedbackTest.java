@@ -9,6 +9,7 @@ import java.util.Set;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 // TODO - need to find a way to detect someone playing the system.. that'll be when they just click submit to get all the feedback... or something similar.. that's why its really important to capture things on timeline...
 
@@ -112,7 +113,7 @@ public class RectangleClassFeedbackTest {
     void shouldGiveFeedbackIfFieldsAreNotPrivate() {
         String sourceCode = """
                 class Rectangle {
-                
+                                
                    int length;
                    int breath;
                    
@@ -132,7 +133,7 @@ public class RectangleClassFeedbackTest {
     void shouldGiveFeedbackIfMethodsNameBreakEncapsulation() {
         String sourceCodeWithGet = """
                 class Rectangle {
-                
+                                
                    int length;
                    int breath;
                    
@@ -144,7 +145,7 @@ public class RectangleClassFeedbackTest {
 
         String sourceCodeWithCalculate = """
                 class Rectangle {
-                
+                                
                    int length;
                    int breath;
                    
@@ -154,17 +155,21 @@ public class RectangleClassFeedbackTest {
                 }
                 """;
 
-        Set<String> feedbacks = new RectangleClassFeedback(sourceCodeWithGet).suggestionKey();
-        assertThat(feedbacks, containsInAnyOrder(
-                "FIELDS_SHOULD_BE_PRIVATE",
-                "METHOD_NAME_BREAKS_ENCAPSULATION"
-        ));
+        Set<String> feedbacksForGet = new RectangleClassFeedback(sourceCodeWithGet).suggestionKey();
+        Set<String> feedbacksForCalculate = new RectangleClassFeedback(sourceCodeWithCalculate).suggestionKey();
 
-        feedbacks = new RectangleClassFeedback(sourceCodeWithCalculate).suggestionKey();
-        assertThat(feedbacks, containsInAnyOrder(
-                "FIELDS_SHOULD_BE_PRIVATE",
-                "METHOD_NAME_BREAKS_ENCAPSULATION"
-        ));
+
+        assertAll(
+                "Verify different ways of breaking encapsulation",
+                () -> assertThat(feedbacksForGet, containsInAnyOrder(
+                        "FIELDS_SHOULD_BE_PRIVATE",
+                        "METHOD_NAME_BREAKS_ENCAPSULATION"
+                )),
+                () -> assertThat(feedbacksForCalculate, containsInAnyOrder(
+                        "FIELDS_SHOULD_BE_PRIVATE",
+                        "METHOD_NAME_BREAKS_ENCAPSULATION"
+                ))
+        );
     }
 
     @Test
@@ -172,7 +177,7 @@ public class RectangleClassFeedbackTest {
     void shouldBeUnknownScenarioIfThereIsAnAreaField() {
         String sourceCode = """
                 class Rectangle {
-                
+                                
                    private int area;
                    
                    public Rectangle(int length, int breath) {}
@@ -190,7 +195,7 @@ public class RectangleClassFeedbackTest {
     void shouldBeUnknownScenarioIfThereIsAnAreaFieldInAdditionToLengthAndBreath() {
         String sourceCode = """
                 class Rectangle {
-                
+                                
                    private int area;
                    private int length;
                    private int breath;
