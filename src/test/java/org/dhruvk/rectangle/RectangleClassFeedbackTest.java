@@ -19,7 +19,21 @@ public class RectangleClassFeedbackTest {
                 """;
 
         Set<String> feedbacks = new RectangleClassFeedback(sourceCode).suggestionKey();
-        assertThat(feedbacks, is(Set.of("NO_CONSTRUCTOR_FOUND")));
+        assertThat(feedbacks, is(Set.of("NO_CONSTRUCTOR_FOUND", "NO_CONSTRUCTOR_PARAMETER")));
+    }
+
+    @Test
+    void shouldGiveFeedbackIfThereAreNoParametersInConstructor() {
+        String sourceCode = """
+                class Rectangle {
+                   public Rectangle() {}
+                                
+                   public double getArea() {}
+                }
+                """;
+
+        Set<String> feedbacks = new RectangleClassFeedback(sourceCode).suggestionKey();
+        assertThat(feedbacks, is(Set.of("NO_CONSTRUCTOR_PARAMETER")));
     }
 
     @Test
@@ -28,8 +42,8 @@ public class RectangleClassFeedbackTest {
         String sourceCode = """
                 class Rectangle {
                    
-                   public Rectangle() {}
-                
+                   public Rectangle(int length) {}
+                                
                    public double getArea() {}
                 }
                 """;

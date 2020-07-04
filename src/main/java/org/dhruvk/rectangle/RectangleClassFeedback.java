@@ -10,12 +10,22 @@ import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 class ShouldHaveConstructor extends VoidVisitorAdapter<AtomicBoolean> {
     @Override
     public void visit(ConstructorDeclaration constructorDeclaration, AtomicBoolean arg) {
         super.visit(constructorDeclaration, arg);
         arg.set(true);
+    }
+}
+
+class NumberOfConstructorParameters extends VoidVisitorAdapter<AtomicInteger> {
+    @Override
+    public void visit(ConstructorDeclaration constructorDeclaration, AtomicInteger arg) {
+        super.visit(constructorDeclaration, arg);
+        NodeList<Parameter> parameters = constructorDeclaration.getParameters();
+        parameters.forEach(p -> arg.incrementAndGet());
     }
 }
 
@@ -34,8 +44,15 @@ public class RectangleClassFeedback implements Rule {
         CompilationUnit compilationUnit = StaticJavaParser.parse(sourceCode);
 
         if(!hasConstructor(compilationUnit)) feedbacks.add("NO_CONSTRUCTOR_FOUND");
+        if(numberOfConstructorParameters(compilationUnit) == 0) feedbacks.add("NO_CONSTRUCTOR_PARAMETER");
 
         return feedbacks.isEmpty() ? Set.of("UNKNOWN_SCENARIO") : feedbacks;
+    }
+
+    private int numberOfConstructorParameters(CompilationUnit compilationUnit) {
+        AtomicInteger numberOfConstructorParameters = new AtomicInteger(0);
+        new NumberOfConstructorParameters().visit(compilationUnit,numberOfConstructorParameters);
+        return numberOfConstructorParameters.get();
     }
 
     private Boolean hasConstructor(CompilationUnit compilationUnit) {
