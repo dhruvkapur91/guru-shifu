@@ -8,94 +8,83 @@ import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
-class CodeMetrics {
+// TODO - this should probably be more general... but for now I'm going to stay with this concrete implementation
+class RectangleCodeMetrics {
 
-    private boolean hasDefinedClass = false;
+    private static final String NO_CLASS_FOUND = "NO_CLASS_FOUND";
+    private static final String NO_CONSTRUCTOR_FOUND = "NO_CONSTRUCTOR_FOUND";
+    private static final String NO_CONSTRUCTOR_PARAMETER = "NO_CONSTRUCTOR_PARAMETER";
+    private static final String ONLY_ONE_CONSTRUCTOR_PARAMETER = "ONLY_ONE_CONSTRUCTOR_PARAMETER";
+    private static final String TOO_MANY_CONSTRUCTOR_PARAMETER = "TOO_MANY_CONSTRUCTOR_PARAMETER";
+    private static final String NO_FIELDS_FOUND = "NO_FIELDS_FOUND";
+    private static final String FIELDS_SHOULD_BE_PRIVATE = "FIELDS_SHOULD_BE_PRIVATE";
+    private static final String METHOD_NAME_BREAKS_ENCAPSULATION = "METHOD_NAME_BREAKS_ENCAPSULATION";
+    private static final String JAVA_METHOD_NAMING_CONVENTIONS_NOT_FOLLOWED = "JAVA_METHOD_NAMING_CONVENTIONS_NOT_FOLLOWED";
+    private static final String JAVA_FIELD_NAMING_CONVENTIONS_NOT_FOLLOWED = "JAVA_FIELD_NAMING_CONVENTIONS_NOT_FOLLOWED";
+
+    private final Set<String> feedbacks = new HashSet<>();
     private int numberOfConstructorParameters = 0;
-    private boolean hasSomeNonPrivateFields = false;
-    private boolean hasConstructor = false;
-    private int numberOfFields = 0;
-    private boolean someFieldBreaksJavaConventions = false;
-    private boolean someMethodBreaksJavaConventions = false;
-    private boolean someMethodNameBreaksEncapsulation = false;
+
+    RectangleCodeMetrics() {
+        feedbacks.addAll(
+                Set.of(
+                        NO_CLASS_FOUND,
+                        NO_CONSTRUCTOR_FOUND,
+                        NO_FIELDS_FOUND
+                )
+        );
+    }
+
+    public Set<String> getFeedbacks() {
+        if(numberOfConstructorParameters == 0) feedbacks.add(NO_CONSTRUCTOR_PARAMETER);
+        if(numberOfConstructorParameters == 1) feedbacks.add(ONLY_ONE_CONSTRUCTOR_PARAMETER);
+        if(numberOfConstructorParameters > 2) feedbacks.add(TOO_MANY_CONSTRUCTOR_PARAMETER);
+        return feedbacks;
+    }
 
     public void setHasDefinedClass() {
-        this.hasDefinedClass = true;
+        feedbacks.remove(NO_CLASS_FOUND);
     }
 
     public void incrementConstructorParameter() {
         numberOfConstructorParameters++;
     }
 
-    public boolean isClassDefined() {
-        return hasDefinedClass;
-    }
-
-    public int getNumberOfConstructorParameters() {
-        return numberOfConstructorParameters;
-    }
-
     public void markHasSomeNonPrivateFields() {
-        hasSomeNonPrivateFields = true;
+        feedbacks.add(FIELDS_SHOULD_BE_PRIVATE);
     }
 
     public void markSomeFieldBreaksJavaConventions() {
-        someFieldBreaksJavaConventions = true;
+        feedbacks.add(JAVA_FIELD_NAMING_CONVENTIONS_NOT_FOLLOWED);
     }
 
     public void markSomeMethodNameBreaksEncapsulation() {
-        someMethodNameBreaksEncapsulation = true;
+        feedbacks.add(METHOD_NAME_BREAKS_ENCAPSULATION);
     }
 
     public void markSomeMethodBreaksJavaConventions() {
-        someMethodBreaksJavaConventions = true;
-    }
-
-    public boolean hasSomeNonPrivateFields() {
-        return hasSomeNonPrivateFields;
+        feedbacks.add(JAVA_METHOD_NAMING_CONVENTIONS_NOT_FOLLOWED);
     }
 
     public void markHasConstructor() {
-        hasConstructor = true;
-    }
-
-    public boolean hasConstructor() {
-        return hasConstructor;
-    }
-
-    public boolean doesAFieldBreaksJavaConventions() {
-        return someFieldBreaksJavaConventions;
-    }
-
-    public boolean doesAMethodBreaksJavaConventions() {
-        return someMethodBreaksJavaConventions;
-    }
-
-    public boolean doesAMethodNameBreaksJavaEncapsulation() {
-        return someMethodNameBreaksEncapsulation;
-    }
-
-    public int getNumberOfFields() {
-        return numberOfFields;
+        feedbacks.remove(NO_CONSTRUCTOR_FOUND);
     }
 
     public void incrementNumberOfFields() {
-        numberOfFields++;
+        feedbacks.remove(NO_FIELDS_FOUND);
     }
 }
 
-class GetFeedback extends VoidVisitorAdapter<CodeMetrics> {
+class GetFeedback extends VoidVisitorAdapter<RectangleCodeMetrics> {
     @Override
-    public void visit(ClassOrInterfaceDeclaration n, CodeMetrics metrics) {
+    public void visit(ClassOrInterfaceDeclaration n, RectangleCodeMetrics metrics) {
         super.visit(n, metrics);
         metrics.setHasDefinedClass();
     }
 
     @Override
-    public void visit(ConstructorDeclaration constructorDeclaration, CodeMetrics arg) {
+    public void visit(ConstructorDeclaration constructorDeclaration, RectangleCodeMetrics arg) {
         super.visit(constructorDeclaration, arg);
         arg.markHasConstructor();
         NodeList<Parameter> parameters = constructorDeclaration.getParameters();
@@ -103,7 +92,7 @@ class GetFeedback extends VoidVisitorAdapter<CodeMetrics> {
     }
 
     @Override
-    public void visit(FieldDeclaration someField, CodeMetrics arg) {
+    public void visit(FieldDeclaration someField, RectangleCodeMetrics arg) {
         super.visit(someField, arg);
         boolean containsUnderscore = someField.toString().toLowerCase().contains("_");
         if (!someField.isPrivate()) arg.markHasSomeNonPrivateFields();
@@ -112,7 +101,7 @@ class GetFeedback extends VoidVisitorAdapter<CodeMetrics> {
     }
 
     @Override
-    public void visit(MethodDeclaration someMethod, CodeMetrics arg) {
+    public void visit(MethodDeclaration someMethod, RectangleCodeMetrics arg) {
         super.visit(someMethod, arg);
         boolean containsUnderscore = someMethod.toString().toLowerCase().contains("_");
         if (containsUnderscore) arg.markSomeMethodBreaksJavaConventions();
@@ -132,34 +121,12 @@ public class RectangleClassFeedback implements Rule {
 
     @Override
     public Set<String> suggestionKey() {
-        Set<String> feedbacks = new HashSet<>();
-        CodeMetrics codeMetrics = new CodeMetrics();
+        RectangleCodeMetrics rectangleCodeMetrics = new RectangleCodeMetrics();
         CompilationUnit compilationUnit = StaticJavaParser.parse(sourceCode);
 
-        new GetFeedback().visit(compilationUnit, codeMetrics);
+        new GetFeedback().visit(compilationUnit, rectangleCodeMetrics);
 
-        if (!codeMetrics.isClassDefined()) feedbacks.add("NO_CLASS_FOUND");
-
-        int numberOfConstructorParameters = codeMetrics.getNumberOfConstructorParameters();
-
-        if (!codeMetrics.hasConstructor()) feedbacks.add("NO_CONSTRUCTOR_FOUND");
-        if (codeMetrics.hasConstructor() && numberOfConstructorParameters == 0)
-            feedbacks.add("NO_CONSTRUCTOR_PARAMETER");
-        if (numberOfConstructorParameters == 1) feedbacks.add("ONLY_ONE_CONSTRUCTOR_PARAMETER");
-        if (numberOfConstructorParameters > 2) feedbacks.add("TOO_MANY_CONSTRUCTOR_PARAMETER");
-
-        int numberOfFields = codeMetrics.getNumberOfFields();
-        if (numberOfFields == 0) feedbacks.add("NO_FIELDS_FOUND");
-
-        if (codeMetrics.hasSomeNonPrivateFields()) feedbacks.add("FIELDS_SHOULD_BE_PRIVATE");
-
-        if (codeMetrics.doesAMethodNameBreaksJavaEncapsulation()) feedbacks.add("METHOD_NAME_BREAKS_ENCAPSULATION");
-        if (codeMetrics.doesAMethodBreaksJavaConventions())
-            feedbacks.add("JAVA_METHOD_NAMING_CONVENTIONS_NOT_FOLLOWED");
-        if (codeMetrics.doesAFieldBreaksJavaConventions())
-            feedbacks.add("JAVA_FIELD_NAMING_CONVENTIONS_NOT_FOLLOWED");
-
-        return feedbacks.isEmpty() ? Set.of("UNKNOWN_SCENARIO") : feedbacks;
+        return rectangleCodeMetrics.getFeedbacks().isEmpty() ? Set.of("UNKNOWN_SCENARIO") : rectangleCodeMetrics.getFeedbacks();
     }
 
 }
