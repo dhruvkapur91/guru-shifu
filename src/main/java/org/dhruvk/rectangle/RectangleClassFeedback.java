@@ -37,9 +37,10 @@ class RectangleCodeMetrics {
     }
 
     public Set<String> getFeedbacks() {
-        if(!feedbacks.contains(NO_CONSTRUCTOR_FOUND) && numberOfConstructorParameters == 0) feedbacks.add(NO_CONSTRUCTOR_PARAMETER);
-        if(numberOfConstructorParameters == 1) feedbacks.add(ONLY_ONE_CONSTRUCTOR_PARAMETER);
-        if(numberOfConstructorParameters > 2) feedbacks.add(TOO_MANY_CONSTRUCTOR_PARAMETER);
+        if (!feedbacks.contains(NO_CONSTRUCTOR_FOUND) && numberOfConstructorParameters == 0)
+            feedbacks.add(NO_CONSTRUCTOR_PARAMETER);
+        if (numberOfConstructorParameters == 1) feedbacks.add(ONLY_ONE_CONSTRUCTOR_PARAMETER);
+        if (numberOfConstructorParameters > 2) feedbacks.add(TOO_MANY_CONSTRUCTOR_PARAMETER);
         return feedbacks;
     }
 
@@ -79,13 +80,22 @@ class RectangleCodeMetrics {
         feedbacks.add(FIELDS_CAN_BE_FINAL);
     }
 
-    public Optional<String> getClassName() {
+    private Optional<String> getClassName() {
         return className == null ? Optional.empty() : Optional.of(className);
     }
 
     public void setClassName(String nameAsString) {
         className = nameAsString;
     }
+
+    public Optional<String> invokeExpression(RectangleDimensions rectangleDimensions) {
+        if (numberOfConstructorParameters == 2 && getClassName().isPresent()) { // TODO - maybe we can use java-parser for generating the call expressions too, but couldn't find a way to do it as of now...
+            return Optional.of("new %s(%d,%d).area()".formatted(getClassName().get(), rectangleDimensions.getLength(), rectangleDimensions.getBreath()));
+        }
+        feedbacks.add("NON_UNDERSTANDABLE_API"); // TODO - test this.
+        return Optional.empty();
+    }
+
 }
 
 public class RectangleClassFeedback implements Rule {
