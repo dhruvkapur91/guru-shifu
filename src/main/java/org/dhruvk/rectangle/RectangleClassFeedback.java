@@ -71,6 +71,17 @@ class MethodNamesShouldFollowJavaConventions extends VoidVisitorAdapter<AtomicBo
     }
 }
 
+class FieldNamesShouldFollowJavaConventions extends VoidVisitorAdapter<AtomicBoolean> {
+
+    @Override
+    public void visit(FieldDeclaration n, AtomicBoolean arg) {
+        super.visit(n, arg);
+        boolean containsUnderscore = n.toString().toLowerCase().contains("_");
+        if(containsUnderscore) arg.set(true);
+    }
+
+}
+
 
 public class RectangleClassFeedback implements Rule {
 
@@ -100,6 +111,7 @@ public class RectangleClassFeedback implements Rule {
         if (hasPublicFields(compilationUnit)) feedbacks.add("FIELDS_SHOULD_BE_PRIVATE");
         if (methodsBreakEncapsulation(compilationUnit)) feedbacks.add("METHOD_NAME_BREAKS_ENCAPSULATION");
         if (methodNamesBreakJavaConventions(compilationUnit)) feedbacks.add("JAVA_METHOD_NAMING_CONVENTIONS_NOT_FOLLOWED");
+        if (fieldNamesBreakJavaConventions(compilationUnit)) feedbacks.add("JAVA_FIELD_NAMING_CONVENTIONS_NOT_FOLLOWED");
 
         return feedbacks.isEmpty() ? Set.of("UNKNOWN_SCENARIO") : feedbacks;
     }
@@ -107,6 +119,12 @@ public class RectangleClassFeedback implements Rule {
     private boolean methodNamesBreakJavaConventions(CompilationUnit compilationUnit) {
         AtomicBoolean hasAClass = new AtomicBoolean(false);
         new MethodNamesShouldFollowJavaConventions().visit(compilationUnit, hasAClass);
+        return hasAClass.get();
+    }
+
+    private boolean fieldNamesBreakJavaConventions(CompilationUnit compilationUnit) {
+        AtomicBoolean hasAClass = new AtomicBoolean(false);
+        new FieldNamesShouldFollowJavaConventions().visit(compilationUnit, hasAClass);
         return hasAClass.get();
     }
 

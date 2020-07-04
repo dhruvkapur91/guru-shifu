@@ -148,7 +148,32 @@ public class RectangleClassFeedbackTest {
         assertThat(feedbacks, containsInAnyOrder(
                 "METHOD_NAME_BREAKS_ENCAPSULATION",
                 "JAVA_METHOD_NAMING_CONVENTIONS_NOT_FOLLOWED"
+        ));
+    }
 
+    @Test
+    void shouldGiveFeedbackIfMFieldNamesHaveUnderscores() {
+        String sourceCode = """
+                class Rectangle {
+                                
+                   private int rectangle_length;
+                   private int rectangle_breath;
+                   
+                   public Rectangle(int length, int breath) {
+                        this.area = length * breath;
+                   }
+                                
+                   public double get_area() {
+                    return area;
+                   }
+                }
+                """;
+
+        Set<String> feedbacks = new RectangleClassFeedback(sourceCode).suggestionKey();
+        assertThat(feedbacks, containsInAnyOrder(
+                "METHOD_NAME_BREAKS_ENCAPSULATION",
+                "JAVA_METHOD_NAMING_CONVENTIONS_NOT_FOLLOWED",
+                "JAVA_FIELD_NAMING_CONVENTIONS_NOT_FOLLOWED"
         ));
     }
 
