@@ -34,15 +34,16 @@ public class RectangleClassFeedback implements Rule {
     @Override
     public Set<String> suggestionKey() {
         Set<String> feedbacks = new HashSet<>();
-
         CompilationUnit compilationUnit = StaticJavaParser.parse(sourceCode);
-        AtomicBoolean hasConstructor = new AtomicBoolean(false);
-        new ShouldHaveConstructor().visit(compilationUnit,hasConstructor);
 
-        if(!hasConstructor.get()) {
-            feedbacks.add("NO_CONSTRUCTOR_FOUND");
-        }
+        if(!hasConstructor(compilationUnit)) feedbacks.add("NO_CONSTRUCTOR_FOUND");
 
         return feedbacks.isEmpty() ? Set.of("UNKNOWN_SCENARIO") : feedbacks;
+    }
+
+    private Boolean hasConstructor(CompilationUnit compilationUnit) {
+        AtomicBoolean hasConstructor = new AtomicBoolean(false);
+        new ShouldHaveConstructor().visit(compilationUnit,hasConstructor);
+        return hasConstructor.get();
     }
 }
