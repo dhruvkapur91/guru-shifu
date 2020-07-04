@@ -2,11 +2,9 @@ package org.dhruvk.rectangle;
 
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.NodeList;
-import com.github.javaparser.ast.body.*;
-import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 // TODO - this should probably be more general... but for now I'm going to stay with this concrete implementation
@@ -26,6 +24,7 @@ class RectangleCodeMetrics {
 
     private final Set<String> feedbacks = new HashSet<>(); // TODO - think list or set, currently we maybe loosing information by keeping it a set.... I think we should have a list internally and a set externally... but this will do for now...
     private int numberOfConstructorParameters = 0;
+    private String className;
 
     RectangleCodeMetrics() {
         feedbacks.addAll(
@@ -79,41 +78,13 @@ class RectangleCodeMetrics {
     public void markSomeFieldIsNotFinal() {
         feedbacks.add(FIELDS_CAN_BE_FINAL);
     }
-}
 
-class PopulateRectangleCodeMetrics extends VoidVisitorAdapter<RectangleCodeMetrics> {
-    @Override
-    public void visit(ClassOrInterfaceDeclaration n, RectangleCodeMetrics metrics) {
-        super.visit(n, metrics);
-        metrics.setHasDefinedClass();
+    public Optional<String> getClassName() {
+        return className == null ? Optional.empty() : Optional.of(className);
     }
 
-    @Override
-    public void visit(ConstructorDeclaration constructorDeclaration, RectangleCodeMetrics arg) {
-        super.visit(constructorDeclaration, arg);
-        arg.markHasConstructor();
-        NodeList<Parameter> parameters = constructorDeclaration.getParameters();
-        parameters.forEach(p -> arg.incrementConstructorParameter());
-    }
-
-    @Override
-    public void visit(FieldDeclaration someField, RectangleCodeMetrics arg) {
-        super.visit(someField, arg);
-        boolean containsUnderscore = someField.toString().toLowerCase().contains("_");
-        if (!someField.isFinal()) arg.markSomeFieldIsNotFinal();
-        if (!someField.isPrivate()) arg.markHasSomeNonPrivateFields();
-        if (containsUnderscore) arg.markSomeFieldBreaksJavaConventions();
-        arg.incrementNumberOfFields();
-    }
-
-    @Override
-    public void visit(MethodDeclaration someMethod, RectangleCodeMetrics arg) {
-        super.visit(someMethod, arg);
-        boolean containsUnderscore = someMethod.toString().toLowerCase().contains("_");
-        if (containsUnderscore) arg.markSomeMethodBreaksJavaConventions();
-        boolean containsGet = someMethod.getNameAsString().toLowerCase().contains("get");
-        boolean containsCalculate = someMethod.getNameAsString().toLowerCase().contains("calculate");
-        if (containsGet || containsCalculate) arg.markSomeMethodNameBreaksEncapsulation();
+    public void setClassName(String nameAsString) {
+        className = nameAsString;
     }
 }
 
