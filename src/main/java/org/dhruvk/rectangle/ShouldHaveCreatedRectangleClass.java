@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 import static org.apache.commons.io.FilenameUtils.getExtension;
@@ -19,6 +20,7 @@ public class ShouldHaveCreatedRectangleClass implements Rule {
 
     @Override
     public Optional<String> suggestionKey() {
+        // TODO, maybe we should return all applicable feedbacks... not just one, and prioritization should be a separate activity...
         if (moreThanOneFileExists()) return Optional.of("UNNECESSARY_FILES_FOUND");
         if (lowerCaseClassFilesFound()) return Optional.of("JAVA_FILE_NAMING_CONVENTIONS_NOT_FOLLOWED");
         if (noJavaFileFound()) return Optional.of("NO_JAVA_FILE_FOUND");
@@ -27,13 +29,15 @@ public class ShouldHaveCreatedRectangleClass implements Rule {
     }
 
     private boolean lowerCaseClassFilesFound() {
+        String filesStartWithLowerCase = "[a-z]+.*";
+
         try {
-            long count = Files.walk(absoluteSourcePath)
+            long numberOfJavaFilesWithLowerCase = Files.walk(absoluteSourcePath)
                     .filter(Files::isRegularFile)
-                    .filter(file -> getExtension(file.toString()).equals("java"))
-                    .filter(file -> Pattern.compile("[a-z]+.*").matcher(file.getFileName().toString()).matches())
+                    .filter(isJavaFile())
+                    .filter(file -> Pattern.compile(filesStartWithLowerCase).matcher(file.getFileName().toString()).matches())
                     .count();
-            if (count == 0) {
+            if (numberOfJavaFilesWithLowerCase == 0) {
                 return false;
             }
         } catch (IOException e) {
@@ -44,11 +48,11 @@ public class ShouldHaveCreatedRectangleClass implements Rule {
 
     private boolean noJavaFileFound() { // TODO - wait for removing the duplication of the Files API... lets see enough of it to understand what will be a good abstraction
         try {
-            long count = Files.walk(absoluteSourcePath)
+            long numberOfJavaFiles = Files.walk(absoluteSourcePath)
                     .filter(Files::isRegularFile)
-                    .filter(file -> getExtension(file.toString()).equals("java"))
+                    .filter(isJavaFile())
                     .count();
-            if (count == 0) {
+            if (numberOfJavaFiles == 0) {
                 return true;
             }
         } catch (IOException e) {
@@ -57,12 +61,16 @@ public class ShouldHaveCreatedRectangleClass implements Rule {
         return false;
     }
 
+    private Predicate<Path> isJavaFile() {
+        return file -> getExtension(file.toString()).equals("java");
+    }
+
     private boolean moreThanOneFileExists() {
         try {
-            long count = Files.walk(absoluteSourcePath)
+            long numberOfFiles = Files.walk(absoluteSourcePath)
                     .filter(Files::isRegularFile)
                     .count();
-            if (count > 1) {
+            if (numberOfFiles > 1) {
                 return true;
             }
         } catch (IOException e) {
