@@ -42,9 +42,11 @@ public class RectangleClassFeedback implements Rule {
     public Set<String> suggestionKey() {
         Set<String> feedbacks = new HashSet<>();
         CompilationUnit compilationUnit = StaticJavaParser.parse(sourceCode);
+        int numberOfConstructorParameters = numberOfConstructorParameters(compilationUnit);
 
         if(!hasConstructor(compilationUnit)) feedbacks.add("NO_CONSTRUCTOR_FOUND");
-        if(numberOfConstructorParameters(compilationUnit) == 0) feedbacks.add("NO_CONSTRUCTOR_PARAMETER");
+        if(numberOfConstructorParameters == 0) feedbacks.add("NO_CONSTRUCTOR_PARAMETER");
+        if(numberOfConstructorParameters == 1) feedbacks.add("ONLY_ONE_CONSTRUCTOR_PARAMETER");
 
         return feedbacks.isEmpty() ? Set.of("UNKNOWN_SCENARIO") : feedbacks;
     }

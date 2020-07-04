@@ -8,6 +8,8 @@ import java.util.Set;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
+// TODO - need to find a way to detect someone playing the system.. that'll be when they just click submit to get all the feedback... or something similar.. that's why its really important to capture things on timeline...
+
 public class RectangleClassFeedbackTest {
 
     @Test
@@ -37,12 +39,26 @@ public class RectangleClassFeedbackTest {
     }
 
     @Test
-    @Tag("To Remove")
+    void shouldGiveFeedbackIfThereIsOnlyOneParametersInConstructor() {
+        String sourceCode = """
+                class Rectangle {
+                   public Rectangle(int x) {}
+                                
+                   public double getArea() {}
+                }
+                """;
+
+        Set<String> feedbacks = new RectangleClassFeedback(sourceCode).suggestionKey();
+        assertThat(feedbacks, is(Set.of("ONLY_ONE_CONSTRUCTOR_PARAMETER")));
+    }
+
+    @Test
+    @Tag("ToRemove")
     void shouldBeUnknownScenario() {
         String sourceCode = """
                 class Rectangle {
                    
-                   public Rectangle(int length) {}
+                   public Rectangle(int length, int breath) {}
                                 
                    public double getArea() {}
                 }
