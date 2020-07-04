@@ -23,7 +23,6 @@ public class ShouldHaveCreatedRectangleClass implements Rule {
 
     @Override
     public Set<String> suggestionKey() {
-        // TODO, maybe we should return all applicable feedbacks... not just one, and prioritization should be a separate activity...
         Set<String> feedbacks = new HashSet<>();
         try {
             if (moreThanOneFileExists()) feedbacks.add("UNNECESSARY_FILES_FOUND");
@@ -34,7 +33,6 @@ public class ShouldHaveCreatedRectangleClass implements Rule {
             throw new RuntimeException(e);
         }
         return feedbacks.isEmpty() ? Set.of("UNKNOWN_SCENARIO") : feedbacks;
-
     }
 
     private boolean lowerCaseClassFilesFound() throws IOException {
