@@ -1,8 +1,7 @@
 package org.dhruvk.rectangle;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.Set;
 
 public interface Rule {
-    List<String> suggestionKey(); // TODO - the return type maybe restrictive, might be a suggestion of primitive obsession
+    Set<String> suggestionKey(); // TODO - the return type maybe restrictive, might be a suggestion of primitive obsession
 }

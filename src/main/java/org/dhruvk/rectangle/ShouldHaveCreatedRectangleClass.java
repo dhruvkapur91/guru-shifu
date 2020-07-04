@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
@@ -20,9 +22,9 @@ public class ShouldHaveCreatedRectangleClass implements Rule {
     }
 
     @Override
-    public List<String> suggestionKey() {
+    public Set<String> suggestionKey() {
         // TODO, maybe we should return all applicable feedbacks... not just one, and prioritization should be a separate activity...
-        List<String> feedbacks = new ArrayList<>();
+        Set<String> feedbacks = new HashSet<>();
         try {
             if (moreThanOneFileExists()) feedbacks.add("UNNECESSARY_FILES_FOUND");
             if (lowerCaseClassFilesFound()) feedbacks.add("JAVA_FILE_NAMING_CONVENTIONS_NOT_FOLLOWED");
@@ -31,7 +33,7 @@ public class ShouldHaveCreatedRectangleClass implements Rule {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return feedbacks.isEmpty() ? List.of("UNKNOWN_SCENARIO") : feedbacks;
+        return feedbacks.isEmpty() ? Set.of("UNKNOWN_SCENARIO") : feedbacks;
 
     }
 
