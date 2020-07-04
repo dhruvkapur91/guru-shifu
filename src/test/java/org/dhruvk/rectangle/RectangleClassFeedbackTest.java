@@ -128,6 +128,31 @@ public class RectangleClassFeedbackTest {
     }
 
     @Test
+    void shouldGiveFeedbackIfMethodsNamesHaveUnderscores() {
+        String sourceCode = """
+                class Rectangle {
+                                
+                   private int area;
+                   
+                   public Rectangle(int length, int breath) {
+                        this.area = length * breath;
+                   }
+                                
+                   public double get_area() {
+                    return area;
+                   }
+                }
+                """;
+
+        Set<String> feedbacks = new RectangleClassFeedback(sourceCode).suggestionKey();
+        assertThat(feedbacks, containsInAnyOrder(
+                "METHOD_NAME_BREAKS_ENCAPSULATION",
+                "JAVA_METHOD_NAMING_CONVENTIONS_NOT_FOLLOWED"
+
+        ));
+    }
+
+    @Test
     void shouldGiveFeedbackIfMethodsNameBreakEncapsulation() {
         String sourceCodeWithGet = """
                 class Rectangle {

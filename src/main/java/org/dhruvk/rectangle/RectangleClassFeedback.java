@@ -62,6 +62,15 @@ class MethodNamesShouldNotBreakEncapsulation extends VoidVisitorAdapter<AtomicBo
     }
 }
 
+class MethodNamesShouldFollowJavaConventions extends VoidVisitorAdapter<AtomicBoolean> {
+    @Override
+    public void visit(MethodDeclaration someMethod, AtomicBoolean arg) {
+        super.visit(someMethod, arg);
+        boolean containsUnderscore = someMethod.getNameAsString().toLowerCase().contains("_");
+        if(containsUnderscore) arg.set(true);
+    }
+}
+
 
 public class RectangleClassFeedback implements Rule {
 
@@ -90,15 +99,21 @@ public class RectangleClassFeedback implements Rule {
 
         if (hasPublicFields(compilationUnit)) feedbacks.add("FIELDS_SHOULD_BE_PRIVATE");
         if (methodsBreakEncapsulation(compilationUnit)) feedbacks.add("METHOD_NAME_BREAKS_ENCAPSULATION");
+        if (methodNamesBreakJavaConventions(compilationUnit)) feedbacks.add("JAVA_METHOD_NAMING_CONVENTIONS_NOT_FOLLOWED");
 
         return feedbacks.isEmpty() ? Set.of("UNKNOWN_SCENARIO") : feedbacks;
+    }
+
+    private boolean methodNamesBreakJavaConventions(CompilationUnit compilationUnit) {
+        AtomicBoolean hasAClass = new AtomicBoolean(false);
+        new MethodNamesShouldFollowJavaConventions().visit(compilationUnit, hasAClass);
+        return hasAClass.get();
     }
 
     private boolean hasOneClass(CompilationUnit compilationUnit) {
         AtomicBoolean hasAClass = new AtomicBoolean(false);
         new ThereShouldBeAClass().visit(compilationUnit, hasAClass);
         return hasAClass.get();
-
     }
 
     private int numberOfFields(CompilationUnit compilationUnit) {
