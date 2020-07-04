@@ -24,36 +24,36 @@ class ShouldHaveCreatedRectangleClassTest {
 //     TODO - unable to add test for empty directory as git won't add it?
 
     @Test
-    void shouldFailOnDirectoryContainingNoJavaFiles() {
+    void shouldGiveFeedbackForDirectoryContainingNoJavaFiles() {
         assertThat(findFeedbackFor(directoryWithNoJavaFiles), is(Optional.of("NO_JAVA_FILE_FOUND"))); // TODO - is it possible to get this as a key from resource bundle to prevent hardcoding...?
     }
 
     @Test
-    void shouldPassOnDirectoryContainingRectangleClassFile() {
+    void shouldGiveNoFeedbackForDirectoryContainingRectangleClassFile() {
         assertThat(findFeedbackFor(directoryWithOnlyRectangleFile), is(Optional.empty()));
     }
 
     @Test
-    void shouldFailOnDirectoryContainingUnnecessaryClassFile() {
+    void shouldGiveFeedbackForDirectoryContainingUnnecessaryClassFile() {
         Optional<String> expected = Optional.of("UNNECESSARY_FILES_FOUND");
         assertThat(findFeedbackFor(directoryWithRectanglePlusUnnecessaryFiles), is(expected));
     }
 
     @Test
-    void shouldFailIfNameOfTheClassDoesNotFollowJavaConventions() {
+    void shouldGiveFeedbackForIfNameOfTheClassDoesNotFollowJavaConventions() {
         Optional<String> expected = Optional.of("JAVA_FILE_NAMING_CONVENTIONS_NOT_FOLLOWED");
         assertThat(findFeedbackFor(directoryWithOnlyRectangleFileWithoutFollowingConventions), is(expected));
+    }
+
+    @Test
+    void shouldReportUnknownScenarioWhenSeeingATypoForNow() {
+        assertThat(findFeedbackFor(directoryWithRectangleFileWithTypos), is(Optional.of("UNKNOWN_SCENARIO")));
     }
 
     @Test
     void shouldRequireThatTheClientSendsAnAbsolutePath() {
         AssertionError assertionError = Assertions.assertThrows(AssertionError.class, () -> new ShouldHaveCreatedRectangleClass(get("some/relative/directory")));
         assertThat(assertionError.getMessage(), is("Expected absolute path, but looks like you passed a relative path -> some/relative/directory"));
-    }
-
-    @Test
-    void shouldReportUnknownScenarioWhenSeeingATypoForNow() {
-        assertThat(findFeedbackFor(directoryWithRectangleFileWithTypos), is(Optional.of("UNKNOWN_SCENARIO")));
     }
 
     Optional<String> findFeedbackFor(Path path) {
