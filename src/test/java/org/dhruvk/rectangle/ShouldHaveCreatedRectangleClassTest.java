@@ -51,6 +51,11 @@ class ShouldHaveCreatedRectangleClassTest {
         assertThat(assertionError.getMessage(), is("Expected absolute path, but looks like you passed a relative path -> some/relative/directory"));
     }
 
+    @Test
+    void shouldReportUnknownScenarioWhenSeeingATypoForNow() {
+        assertThat(findFeedbackFor(directoryWithRectangleFileWithTypos), is(Optional.of("UNKNOWN_SCENARIO")));
+    }
+
     Optional<String> findFeedbackFor(Path path) {
         return new ShouldHaveCreatedRectangleClass(path).suggestionKey();
     }
