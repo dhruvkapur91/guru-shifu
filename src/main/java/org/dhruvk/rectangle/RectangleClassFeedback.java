@@ -18,6 +18,7 @@ class CodeMetrics {
     private int numberOfConstructorParameters = 0;
     private boolean hasSomeNonPrivateFields = false;
     private boolean hasConstructor = false;
+    private int numberOfFields = 0;
 
     public void setHasDefinedClass() {
         this.hasDefinedClass = true;
@@ -50,6 +51,14 @@ class CodeMetrics {
     public boolean hasConstructor() {
         return hasConstructor;
     }
+
+    public int getNumberOfFields() {
+        return numberOfFields;
+    }
+
+    public void incrementNumberOfFields() {
+        numberOfFields++;
+    }
 }
 
 class GetFeedback extends VoidVisitorAdapter<CodeMetrics> {
@@ -71,14 +80,7 @@ class GetFeedback extends VoidVisitorAdapter<CodeMetrics> {
     public void visit(FieldDeclaration someField, CodeMetrics arg) {
         super.visit(someField, arg);
         if (!someField.isPrivate()) arg.markHasSomeNonPrivateFields();
-    }
-}
-
-class NumberOfFields extends VoidVisitorAdapter<AtomicInteger> {
-    @Override
-    public void visit(FieldDeclaration n, AtomicInteger arg) {
-        super.visit(n, arg);
-        arg.incrementAndGet();
+        arg.incrementNumberOfFields();
     }
 }
 
@@ -138,7 +140,7 @@ public class RectangleClassFeedback implements Rule {
         if (numberOfConstructorParameters == 1) feedbacks.add("ONLY_ONE_CONSTRUCTOR_PARAMETER");
         if (numberOfConstructorParameters > 2) feedbacks.add("TOO_MANY_CONSTRUCTOR_PARAMETER");
 
-        int numberOfFields = numberOfFields(compilationUnit);
+        int numberOfFields = codeMetrics.getNumberOfFields();
         if (numberOfFields == 0) feedbacks.add("NO_FIELDS_FOUND");
 
         if (codeMetrics.hasSomeNonPrivateFields()) feedbacks.add("FIELDS_SHOULD_BE_PRIVATE");
@@ -162,12 +164,6 @@ public class RectangleClassFeedback implements Rule {
         AtomicBoolean hasAClass = new AtomicBoolean(false);
         new FieldNamesShouldFollowJavaConventions().visit(compilationUnit, hasAClass);
         return hasAClass.get();
-    }
-
-    private int numberOfFields(CompilationUnit compilationUnit) {
-        AtomicInteger numberOfFields = new AtomicInteger(0);
-        new NumberOfFields().visit(compilationUnit, numberOfFields);
-        return numberOfFields.get();
     }
 
     private Boolean methodsBreakEncapsulation(CompilationUnit compilationUnit) {
