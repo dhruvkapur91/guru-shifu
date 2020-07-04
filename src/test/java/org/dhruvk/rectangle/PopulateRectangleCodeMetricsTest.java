@@ -5,8 +5,8 @@ import com.github.javaparser.ast.CompilationUnit;
 import jdk.jshell.JShell;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.lang.Boolean.TRUE;
@@ -25,14 +25,14 @@ We need to be careful that this code runs either locally (which is preferable) b
 
 class PopulateRectangleCodeMetricsTest {
 
-    Map<RectangleDimensions, Integer> dimensionsAndCorrespondingArea = Map.of(
-            new RectangleDimensions(0, 0), 0,
-            new RectangleDimensions(0, 1), 0,
-            new RectangleDimensions(1, 0), 0,
-            new RectangleDimensions(1, 1), 1,
-            new RectangleDimensions(2, 1), 2,
-            new RectangleDimensions(1, 2), 2,
-            new RectangleDimensions(10, 20), 200
+    List<ReferenceRectangle> referenceRectangles = List.of(
+            new ReferenceRectangle(0, 0),
+            new ReferenceRectangle(0, 1),
+            new ReferenceRectangle(1, 0),
+            new ReferenceRectangle(1, 1),
+            new ReferenceRectangle(2, 1),
+            new ReferenceRectangle(1, 2),
+            new ReferenceRectangle(10, 20)
     );
 
 
@@ -61,13 +61,12 @@ class PopulateRectangleCodeMetricsTest {
         JShell jShell = JShell.create();
         jShell.eval(sourceCode);
 
-        Map<Map.Entry<RectangleDimensions, Integer>, Boolean> collect = dimensionsAndCorrespondingArea
-                .entrySet()
+        Map<ReferenceRectangle, Boolean> collect = referenceRectangles
                 .stream()
-                .map(x -> {
-                    String testExpression = rectangleCodeMetrics.invokeExpression(x.getKey()).get();
+                .map(referenceRectangle -> {
+                    String testExpression = rectangleCodeMetrics.invokeExpression(referenceRectangle).get();
                     String value = jShell.eval(testExpression).get(0).value();
-                    return Map.entry(x, Integer.parseInt(value) == x.getValue());
+                    return Map.entry(referenceRectangle, Integer.parseInt(value) == referenceRectangle.area());
                 }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
         assertTrue(collect.values().stream().allMatch(p -> p.equals(TRUE)));

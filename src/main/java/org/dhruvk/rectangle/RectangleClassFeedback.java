@@ -88,9 +88,9 @@ class RectangleCodeMetrics {
         className = nameAsString;
     }
 
-    public Optional<String> invokeExpression(RectangleDimensions rectangleDimensions) {
+    public Optional<String> invokeExpression(ReferenceRectangle rectangle) {
         if (numberOfConstructorParameters == 2 && getClassName().isPresent()) { // TODO - maybe we can use java-parser for generating the call expressions too, but couldn't find a way to do it as of now...
-            return Optional.of("new %s(%d,%d).area()".formatted(getClassName().get(), rectangleDimensions.getLength(), rectangleDimensions.getBreath()));
+            return Optional.of("new %s(%d,%d).area()".formatted(getClassName().get(), rectangle.getLength(), rectangle.getBreath()));
         }
         feedbacks.add("NON_UNDERSTANDABLE_API"); // TODO - test this.
         return Optional.empty();
