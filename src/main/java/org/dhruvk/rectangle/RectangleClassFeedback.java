@@ -24,7 +24,7 @@ class ShouldHaveConstructor extends VoidVisitorAdapter<AtomicBoolean> {
 
 public class RectangleClassFeedback implements Rule {
 
-    private String sourceCode;
+    private final String sourceCode;
 
     public RectangleClassFeedback(String sourceCode) { // TODO - think about interface again, simple enough to start with though
         this.sourceCode = sourceCode;
