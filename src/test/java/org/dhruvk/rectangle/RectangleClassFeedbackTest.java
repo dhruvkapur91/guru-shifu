@@ -152,7 +152,7 @@ public class RectangleClassFeedbackTest {
     }
 
     @Test
-    void shouldGiveFeedbackIfMFieldNamesHaveUnderscores() {
+    void shouldGiveFeedbackIfMethodNamesHaveUnderscores() {
         String sourceCode = """
                 class Rectangle {
                                 
@@ -219,6 +219,7 @@ public class RectangleClassFeedbackTest {
                 ))
         );
     }
+
 
     @Test
     @Tag("ToRemove")

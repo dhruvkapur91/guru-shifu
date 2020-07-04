@@ -23,7 +23,7 @@ class RectangleCodeMetrics {
     private static final String JAVA_METHOD_NAMING_CONVENTIONS_NOT_FOLLOWED = "JAVA_METHOD_NAMING_CONVENTIONS_NOT_FOLLOWED";
     private static final String JAVA_FIELD_NAMING_CONVENTIONS_NOT_FOLLOWED = "JAVA_FIELD_NAMING_CONVENTIONS_NOT_FOLLOWED";
 
-    private final Set<String> feedbacks = new HashSet<>();
+    private final Set<String> feedbacks = new HashSet<>(); // TODO - think list or set, currently we maybe loosing information by keeping it a set.... I think we should have a list internally and a set externally... but this will do for now...
     private int numberOfConstructorParameters = 0;
 
     RectangleCodeMetrics() {
