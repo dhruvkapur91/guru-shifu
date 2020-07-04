@@ -26,34 +26,34 @@ class ShouldHaveCreatedRectangleClassTest {
     @Test
     void shouldGiveFeedbackForDirectoryContainingNoJavaFiles(@TempDir File someFile) throws Exception {
         Path path = setupDirectoryStructure(someFile, "org/dhruvk/rectangle", "blah.txt");
-        assertThat(findFeedbackFor(path), is(Optional.of("NO_JAVA_FILE_FOUND"))); // TODO - is it possible to get this as a key from resource bundle to prevent hardcoding...?
+        assertThat(findFeedbackFor(path), is(List.of("NO_JAVA_FILE_FOUND"))); // TODO - is it possible to get this as a key from resource bundle to prevent hardcoding...?
     }
 
     @Test
     void shouldGiveNoFeedbackForDirectoryContainingRectangleClassFile(@TempDir File someFile) throws Exception {
         Path path = setupDirectoryStructure(someFile, "org/dhruvk/rectangle", "Rectangle.java");
-        assertThat(findFeedbackFor(path), is(Optional.empty()));
+        assertThat(findFeedbackFor(path), is(List.of()));
     }
 
     @Test
     void shouldGiveFeedbackForDirectoryContainingUnnecessaryClassFile(@TempDir File someFile) throws Exception {
         Path path = setupDirectoryStructure(someFile, "org/dhruvk/rectangle", "Rectangle.java");
         setupDirectoryStructure(someFile, "org/dhruvk/rectangle", "Blah.java");
-        Optional<String> expected = Optional.of("UNNECESSARY_FILES_FOUND");
+        List<String> expected = List.of("UNNECESSARY_FILES_FOUND");
         assertThat(findFeedbackFor(path), is(expected));
     }
 
     @Test
     void shouldGiveFeedbackForIfNameOfTheClassDoesNotFollowJavaConventions(@TempDir File someFile) throws Exception {
         Path path = setupDirectoryStructure(someFile, "org/dhruvk/rectangle", "rectangle.java");
-        Optional<String> expected = Optional.of("JAVA_FILE_NAMING_CONVENTIONS_NOT_FOLLOWED");
+        List<String> expected = List.of("JAVA_FILE_NAMING_CONVENTIONS_NOT_FOLLOWED");
         assertThat(findFeedbackFor(path), is(expected));
     }
 
     @Test
     void shouldReportUnknownScenarioWhenSeeingATypoForNow(@TempDir File someFile) throws Exception {
         Path path = setupDirectoryStructure(someFile, "org/dhruvk/rectangle", "Recangle.java");
-        assertThat(findFeedbackFor(path), is(Optional.of("UNKNOWN_SCENARIO")));
+        assertThat(findFeedbackFor(path), is(List.of("UNKNOWN_SCENARIO")));
     }
 
     @Test
@@ -62,7 +62,7 @@ class ShouldHaveCreatedRectangleClassTest {
         assertThat(assertionError.getMessage(), is("Expected absolute path, but looks like you passed a relative path -> some/relative/directory"));
     }
 
-    Optional<String> findFeedbackFor(Path path) {
+    List<String> findFeedbackFor(Path path) {
         return new ShouldHaveCreatedRectangleClass(path).suggestionKey();
     }
 
