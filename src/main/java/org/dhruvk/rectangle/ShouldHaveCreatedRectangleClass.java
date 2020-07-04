@@ -3,8 +3,8 @@ package org.dhruvk.rectangle;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
@@ -22,15 +22,16 @@ public class ShouldHaveCreatedRectangleClass implements Rule {
     @Override
     public List<String> suggestionKey() {
         // TODO, maybe we should return all applicable feedbacks... not just one, and prioritization should be a separate activity...
+        List<String> feedbacks = new ArrayList<>();
         try {
-            if (moreThanOneFileExists()) return List.of("UNNECESSARY_FILES_FOUND");
-            if (lowerCaseClassFilesFound()) return List.of("JAVA_FILE_NAMING_CONVENTIONS_NOT_FOLLOWED");
-            if (noJavaFileFound()) return List.of("NO_JAVA_FILE_FOUND");
-            if (doesRectangleClassExist()) return List.of("FOUND_RECTANGLE_CLASS");
-            return List.of("UNKNOWN_SCENARIO");
+            if (moreThanOneFileExists()) feedbacks.add("UNNECESSARY_FILES_FOUND");
+            if (lowerCaseClassFilesFound()) feedbacks.add("JAVA_FILE_NAMING_CONVENTIONS_NOT_FOLLOWED");
+            if (noJavaFileFound()) feedbacks.add("NO_JAVA_FILE_FOUND");
+            if (doesRectangleClassExist()) feedbacks.add("FOUND_RECTANGLE_CLASS");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        return feedbacks.isEmpty() ? List.of("UNKNOWN_SCENARIO") : feedbacks;
 
     }
 

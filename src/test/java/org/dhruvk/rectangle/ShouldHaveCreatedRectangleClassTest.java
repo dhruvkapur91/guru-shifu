@@ -37,7 +37,7 @@ class ShouldHaveCreatedRectangleClassTest {
 
     @Test
     void shouldGiveFeedbackForDirectoryContainingUnnecessaryClassFile(@TempDir File someFile) throws Exception {
-        Path path = setupDirectoryStructure(someFile, "org/dhruvk/rectangle", "Rectangle.java");
+        Path path = setupDirectoryStructure(someFile, "org/dhruvk/rectangle", "Something.java");
         setupDirectoryStructure(someFile, "org/dhruvk/rectangle", "Blah.java");
         List<String> expected = List.of("UNNECESSARY_FILES_FOUND");
         assertThat(findFeedbackFor(path), is(expected));
