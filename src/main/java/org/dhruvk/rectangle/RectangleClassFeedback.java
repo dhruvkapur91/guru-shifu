@@ -17,6 +17,7 @@ class CodeMetrics {
 
     private int numberOfConstructorParameters = 0;
     private boolean hasSomeNonPrivateFields = false;
+    private boolean hasConstructor = false;
 
     public void setHasDefinedClass() {
         this.hasDefinedClass = true;
@@ -41,6 +42,14 @@ class CodeMetrics {
     public boolean hasSomeNonPrivateFields() {
         return hasSomeNonPrivateFields;
     }
+
+    public void markHasConstructor() {
+        hasConstructor = true;
+    }
+
+    public boolean hasConstructor() {
+        return hasConstructor;
+    }
 }
 
 class GetFeedback extends VoidVisitorAdapter<CodeMetrics> {
@@ -53,6 +62,7 @@ class GetFeedback extends VoidVisitorAdapter<CodeMetrics> {
     @Override
     public void visit(ConstructorDeclaration constructorDeclaration, CodeMetrics arg) {
         super.visit(constructorDeclaration, arg);
+        arg.markHasConstructor();
         NodeList<Parameter> parameters = constructorDeclaration.getParameters();
         parameters.forEach(p -> arg.incrementConstructorParameter());
     }
@@ -61,14 +71,6 @@ class GetFeedback extends VoidVisitorAdapter<CodeMetrics> {
     public void visit(FieldDeclaration someField, CodeMetrics arg) {
         super.visit(someField, arg);
         if (!someField.isPrivate()) arg.markHasSomeNonPrivateFields();
-    }
-}
-
-class ShouldHaveConstructor extends VoidVisitorAdapter<AtomicBoolean> {
-    @Override
-    public void visit(ConstructorDeclaration constructorDeclaration, AtomicBoolean arg) {
-        super.visit(constructorDeclaration, arg);
-        arg.set(true);
     }
 }
 
@@ -130,8 +132,8 @@ public class RectangleClassFeedback implements Rule {
 
         int numberOfConstructorParameters = codeMetrics.getNumberOfConstructorParameters();
 
-        if (!hasConstructor(compilationUnit)) feedbacks.add("NO_CONSTRUCTOR_FOUND");
-        if (hasConstructor(compilationUnit) && numberOfConstructorParameters == 0)
+        if (!codeMetrics.hasConstructor()) feedbacks.add("NO_CONSTRUCTOR_FOUND");
+        if (codeMetrics.hasConstructor() && numberOfConstructorParameters == 0)
             feedbacks.add("NO_CONSTRUCTOR_PARAMETER");
         if (numberOfConstructorParameters == 1) feedbacks.add("ONLY_ONE_CONSTRUCTOR_PARAMETER");
         if (numberOfConstructorParameters > 2) feedbacks.add("TOO_MANY_CONSTRUCTOR_PARAMETER");
@@ -166,12 +168,6 @@ public class RectangleClassFeedback implements Rule {
         AtomicInteger numberOfFields = new AtomicInteger(0);
         new NumberOfFields().visit(compilationUnit, numberOfFields);
         return numberOfFields.get();
-    }
-
-    private Boolean hasConstructor(CompilationUnit compilationUnit) {
-        AtomicBoolean hasConstructor = new AtomicBoolean(false);
-        new ShouldHaveConstructor().visit(compilationUnit, hasConstructor);
-        return hasConstructor.get();
     }
 
     private Boolean methodsBreakEncapsulation(CompilationUnit compilationUnit) {
