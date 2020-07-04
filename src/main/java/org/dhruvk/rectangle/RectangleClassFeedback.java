@@ -5,6 +5,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
+import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
@@ -46,6 +47,14 @@ class IsAnyFieldPublic extends VoidVisitorAdapter<AtomicBoolean> {
     }
 }
 
+class MethodNamesShouldNotBreakEncapsulation extends VoidVisitorAdapter<AtomicBoolean> {
+    @Override
+    public void visit(MethodDeclaration someMethod, AtomicBoolean arg) {
+        super.visit(someMethod, arg);
+        if(someMethod.getNameAsString().toLowerCase().contains("get")) arg.set(true);
+    }
+}
+
 
 public class RectangleClassFeedback implements Rule {
 
@@ -70,6 +79,7 @@ public class RectangleClassFeedback implements Rule {
         if (numberOfFields == 0) feedbacks.add("NO_FIELDS_FOUND");
 
         if (hasPublicFields(compilationUnit)) feedbacks.add("FIELDS_SHOULD_BE_PRIVATE");
+        if (methodsBreakEncapsulation(compilationUnit)) feedbacks.add("METHOD_NAME_BREAKS_ENCAPSULATION");
 
         return feedbacks.isEmpty() ? Set.of("UNKNOWN_SCENARIO") : feedbacks;
     }
@@ -99,5 +109,11 @@ public class RectangleClassFeedback implements Rule {
             new IsAnyFieldPublic().visit(compilationUnit, hasPublicFields);
         }
         return hasPublicFields.get();
+    }
+
+    private Boolean methodsBreakEncapsulation(CompilationUnit compilationUnit) {
+        AtomicBoolean doesMethodsBreakEncapsulation = new AtomicBoolean(false);
+        new MethodNamesShouldNotBreakEncapsulation().visit(compilationUnit,doesMethodsBreakEncapsulation);
+        return doesMethodsBreakEncapsulation.get();
     }
 }

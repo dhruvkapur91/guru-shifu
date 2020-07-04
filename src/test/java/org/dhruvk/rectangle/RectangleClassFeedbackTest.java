@@ -18,7 +18,7 @@ public class RectangleClassFeedbackTest {
     void shouldGiveFeedbackIfThereIsNoConstructor() {
         String sourceCode = """
                 class Rectangle {
-                   public double getArea() {}
+                   public double area() {}
                 }
                 """;
 
@@ -36,7 +36,7 @@ public class RectangleClassFeedbackTest {
                 class Rectangle {
                    public Rectangle() {}
                                 
-                   public double getArea() {}
+                   public double area() {}
                 }
                 """;
 
@@ -53,7 +53,7 @@ public class RectangleClassFeedbackTest {
                 class Rectangle {
                    public Rectangle(int x) {}
                                 
-                   public double getArea() {}
+                   public double area() {}
                 }
                 """;
 
@@ -71,7 +71,7 @@ public class RectangleClassFeedbackTest {
                    
                    public Rectangle(int length, int breath, int height) {}
                                 
-                   public double getArea() {}
+                   public double area() {}
                 }
                 """;
 
@@ -89,7 +89,7 @@ public class RectangleClassFeedbackTest {
                    
                    public Rectangle(int length, int breath) {}
                                 
-                   public double getArea() {}
+                   public double area() {}
                 }
                 """;
 
@@ -107,13 +107,34 @@ public class RectangleClassFeedbackTest {
                    
                    public Rectangle(int length, int breath) {}
                                 
-                   public double getArea() {}
+                   public double area() {}
                 }
                 """;
 
         Set<String> feedbacks = new RectangleClassFeedback(sourceCode).suggestionKey();
         assertThat(feedbacks, containsInAnyOrder(
                 "FIELDS_SHOULD_BE_PRIVATE"
+        ));
+    }
+
+    @Test
+    void shouldGiveFeedbackIfMethodsNameBreakEncapsulation() {
+        String sourceCode = """
+                class Rectangle {
+                
+                   int length;
+                   int breath;
+                   
+                   public Rectangle(int length, int breath) {}
+                                
+                   public double getArea() {}
+                }
+                """;
+
+        Set<String> feedbacks = new RectangleClassFeedback(sourceCode).suggestionKey();
+        assertThat(feedbacks, containsInAnyOrder(
+                "FIELDS_SHOULD_BE_PRIVATE",
+                "METHOD_NAME_BREAKS_ENCAPSULATION"
         ));
     }
 
@@ -127,7 +148,7 @@ public class RectangleClassFeedbackTest {
                    
                    public Rectangle(int length, int breath) {}
                                 
-                   public double getArea() {}
+                   public double area() {}
                 }
                 """;
 
@@ -147,7 +168,7 @@ public class RectangleClassFeedbackTest {
                    
                    public Rectangle(int length, int breath) {}
                                 
-                   public double getArea() {}
+                   public double area() {}
                 }
                 """;
 
