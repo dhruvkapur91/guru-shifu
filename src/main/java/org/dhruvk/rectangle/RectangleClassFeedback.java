@@ -37,7 +37,7 @@ class RectangleCodeMetrics {
     }
 
     public Set<String> getFeedbacks() {
-        if(numberOfConstructorParameters == 0) feedbacks.add(NO_CONSTRUCTOR_PARAMETER);
+        if(!feedbacks.contains(NO_CONSTRUCTOR_FOUND) && numberOfConstructorParameters == 0) feedbacks.add(NO_CONSTRUCTOR_PARAMETER);
         if(numberOfConstructorParameters == 1) feedbacks.add(ONLY_ONE_CONSTRUCTOR_PARAMETER);
         if(numberOfConstructorParameters > 2) feedbacks.add(TOO_MANY_CONSTRUCTOR_PARAMETER);
         return feedbacks;
