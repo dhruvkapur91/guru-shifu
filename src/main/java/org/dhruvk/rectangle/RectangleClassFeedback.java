@@ -16,6 +16,7 @@ class CodeMetrics {
     private boolean hasDefinedClass = false;
 
     private int numberOfConstructorParameters = 0;
+    private boolean hasSomeNonPrivateFields = false;
 
     public void setHasDefinedClass() {
         this.hasDefinedClass = true;
@@ -29,9 +30,16 @@ class CodeMetrics {
         return hasDefinedClass;
     }
 
-
     public int getNumberOfConstructorParameters() {
         return numberOfConstructorParameters;
+    }
+
+    public void markHasSomeNonPrivateFields() {
+        hasSomeNonPrivateFields = true;
+    }
+
+    public boolean hasSomeNonPrivateFields() {
+        return hasSomeNonPrivateFields;
     }
 }
 
@@ -49,6 +57,11 @@ class GetFeedback extends VoidVisitorAdapter<CodeMetrics> {
         parameters.forEach(p -> arg.incrementConstructorParameter());
     }
 
+    @Override
+    public void visit(FieldDeclaration someField, CodeMetrics arg) {
+        super.visit(someField, arg);
+        if (!someField.isPrivate()) arg.markHasSomeNonPrivateFields();
+    }
 }
 
 class ShouldHaveConstructor extends VoidVisitorAdapter<AtomicBoolean> {
@@ -64,14 +77,6 @@ class NumberOfFields extends VoidVisitorAdapter<AtomicInteger> {
     public void visit(FieldDeclaration n, AtomicInteger arg) {
         super.visit(n, arg);
         arg.incrementAndGet();
-    }
-}
-
-class IsAnyFieldPublic extends VoidVisitorAdapter<AtomicBoolean> {
-    @Override
-    public void visit(FieldDeclaration someField, AtomicBoolean arg) {
-        super.visit(someField, arg);
-        if (!someField.isPrivate()) arg.set(true);
     }
 }
 
@@ -134,7 +139,8 @@ public class RectangleClassFeedback implements Rule {
         int numberOfFields = numberOfFields(compilationUnit);
         if (numberOfFields == 0) feedbacks.add("NO_FIELDS_FOUND");
 
-        if (hasPublicFields(compilationUnit)) feedbacks.add("FIELDS_SHOULD_BE_PRIVATE");
+        if (codeMetrics.hasSomeNonPrivateFields()) feedbacks.add("FIELDS_SHOULD_BE_PRIVATE");
+
         if (methodsBreakEncapsulation(compilationUnit)) feedbacks.add("METHOD_NAME_BREAKS_ENCAPSULATION");
         if (methodNamesBreakJavaConventions(compilationUnit))
             feedbacks.add("JAVA_METHOD_NAMING_CONVENTIONS_NOT_FOLLOWED");
@@ -166,15 +172,6 @@ public class RectangleClassFeedback implements Rule {
         AtomicBoolean hasConstructor = new AtomicBoolean(false);
         new ShouldHaveConstructor().visit(compilationUnit, hasConstructor);
         return hasConstructor.get();
-    }
-
-    private Boolean hasPublicFields(CompilationUnit compilationUnit) {
-        int numberOfFields = numberOfFields(compilationUnit);
-        AtomicBoolean hasPublicFields = new AtomicBoolean(false);
-        if (numberOfFields > 0) {
-            new IsAnyFieldPublic().visit(compilationUnit, hasPublicFields);
-        }
-        return hasPublicFields.get();
     }
 
     private Boolean methodsBreakEncapsulation(CompilationUnit compilationUnit) {
