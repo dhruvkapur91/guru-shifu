@@ -53,6 +53,21 @@ public class RectangleClassFeedbackTest {
     }
 
     @Test
+    void shouldGiveFeedbackIfThereIsMoreThanTwoParametersInConstructor() {
+        String sourceCode = """
+                class Rectangle {
+                   
+                   public Rectangle(int length, int breath, int height) {}
+                                
+                   public double getArea() {}
+                }
+                """;
+
+        Set<String> feedbacks = new RectangleClassFeedback(sourceCode).suggestionKey();
+        assertThat(feedbacks, is(Set.of("TOO_MANY_CONSTRUCTOR_PARAMETER")));
+    }
+
+    @Test
     @Tag("ToRemove")
     void shouldBeUnknownScenario() {
         String sourceCode = """
