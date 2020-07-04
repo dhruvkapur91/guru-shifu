@@ -15,12 +15,23 @@ class CodeMetrics {
 
     private boolean hasDefinedClass = false;
 
+    private int numberOfConstructorParameters = 0;
+
     public void setHasDefinedClass() {
         this.hasDefinedClass = true;
     }
 
+    public void incrementConstructorParameter() {
+        numberOfConstructorParameters++;
+    }
+
     public boolean isClassDefined() {
         return hasDefinedClass;
+    }
+
+
+    public int getNumberOfConstructorParameters() {
+        return numberOfConstructorParameters;
     }
 }
 
@@ -31,6 +42,13 @@ class GetFeedback extends VoidVisitorAdapter<CodeMetrics> {
         metrics.setHasDefinedClass();
     }
 
+    @Override
+    public void visit(ConstructorDeclaration constructorDeclaration, CodeMetrics arg) {
+        super.visit(constructorDeclaration, arg);
+        NodeList<Parameter> parameters = constructorDeclaration.getParameters();
+        parameters.forEach(p -> arg.incrementConstructorParameter());
+    }
+
 }
 
 class ShouldHaveConstructor extends VoidVisitorAdapter<AtomicBoolean> {
@@ -38,15 +56,6 @@ class ShouldHaveConstructor extends VoidVisitorAdapter<AtomicBoolean> {
     public void visit(ConstructorDeclaration constructorDeclaration, AtomicBoolean arg) {
         super.visit(constructorDeclaration, arg);
         arg.set(true);
-    }
-}
-
-class NumberOfConstructorParameters extends VoidVisitorAdapter<AtomicInteger> {
-    @Override
-    public void visit(ConstructorDeclaration constructorDeclaration, AtomicInteger arg) {
-        super.visit(constructorDeclaration, arg);
-        NodeList<Parameter> parameters = constructorDeclaration.getParameters();
-        parameters.forEach(p -> arg.incrementAndGet());
     }
 }
 
@@ -72,7 +81,7 @@ class MethodNamesShouldNotBreakEncapsulation extends VoidVisitorAdapter<AtomicBo
         super.visit(someMethod, arg);
         boolean containsGet = someMethod.getNameAsString().toLowerCase().contains("get");
         boolean containsCalculate = someMethod.getNameAsString().toLowerCase().contains("calculate");
-        if(containsGet || containsCalculate) arg.set(true);
+        if (containsGet || containsCalculate) arg.set(true);
     }
 }
 
@@ -81,7 +90,7 @@ class MethodNamesShouldFollowJavaConventions extends VoidVisitorAdapter<AtomicBo
     public void visit(MethodDeclaration someMethod, AtomicBoolean arg) {
         super.visit(someMethod, arg);
         boolean containsUnderscore = someMethod.getNameAsString().toLowerCase().contains("_");
-        if(containsUnderscore) arg.set(true);
+        if (containsUnderscore) arg.set(true);
     }
 }
 
@@ -91,11 +100,10 @@ class FieldNamesShouldFollowJavaConventions extends VoidVisitorAdapter<AtomicBoo
     public void visit(FieldDeclaration n, AtomicBoolean arg) {
         super.visit(n, arg);
         boolean containsUnderscore = n.toString().toLowerCase().contains("_");
-        if(containsUnderscore) arg.set(true);
+        if (containsUnderscore) arg.set(true);
     }
 
 }
-
 
 public class RectangleClassFeedback implements Rule {
 
@@ -107,20 +115,19 @@ public class RectangleClassFeedback implements Rule {
 
     @Override
     public Set<String> suggestionKey() {
-
-
         Set<String> feedbacks = new HashSet<>();
         CodeMetrics codeMetrics = new CodeMetrics();
         CompilationUnit compilationUnit = StaticJavaParser.parse(sourceCode);
 
         new GetFeedback().visit(compilationUnit, codeMetrics);
 
-        if(!codeMetrics.isClassDefined()) feedbacks.add("NO_CLASS_FOUND");
+        if (!codeMetrics.isClassDefined()) feedbacks.add("NO_CLASS_FOUND");
 
-        int numberOfConstructorParameters = numberOfConstructorParameters(compilationUnit);
+        int numberOfConstructorParameters = codeMetrics.getNumberOfConstructorParameters();
 
         if (!hasConstructor(compilationUnit)) feedbacks.add("NO_CONSTRUCTOR_FOUND");
-        if (hasConstructor(compilationUnit) && numberOfConstructorParameters == 0) feedbacks.add("NO_CONSTRUCTOR_PARAMETER");
+        if (hasConstructor(compilationUnit) && numberOfConstructorParameters == 0)
+            feedbacks.add("NO_CONSTRUCTOR_PARAMETER");
         if (numberOfConstructorParameters == 1) feedbacks.add("ONLY_ONE_CONSTRUCTOR_PARAMETER");
         if (numberOfConstructorParameters > 2) feedbacks.add("TOO_MANY_CONSTRUCTOR_PARAMETER");
 
@@ -129,8 +136,10 @@ public class RectangleClassFeedback implements Rule {
 
         if (hasPublicFields(compilationUnit)) feedbacks.add("FIELDS_SHOULD_BE_PRIVATE");
         if (methodsBreakEncapsulation(compilationUnit)) feedbacks.add("METHOD_NAME_BREAKS_ENCAPSULATION");
-        if (methodNamesBreakJavaConventions(compilationUnit)) feedbacks.add("JAVA_METHOD_NAMING_CONVENTIONS_NOT_FOLLOWED");
-        if (fieldNamesBreakJavaConventions(compilationUnit)) feedbacks.add("JAVA_FIELD_NAMING_CONVENTIONS_NOT_FOLLOWED");
+        if (methodNamesBreakJavaConventions(compilationUnit))
+            feedbacks.add("JAVA_METHOD_NAMING_CONVENTIONS_NOT_FOLLOWED");
+        if (fieldNamesBreakJavaConventions(compilationUnit))
+            feedbacks.add("JAVA_FIELD_NAMING_CONVENTIONS_NOT_FOLLOWED");
 
         return feedbacks.isEmpty() ? Set.of("UNKNOWN_SCENARIO") : feedbacks;
     }
@@ -153,12 +162,6 @@ public class RectangleClassFeedback implements Rule {
         return numberOfFields.get();
     }
 
-    private int numberOfConstructorParameters(CompilationUnit compilationUnit) {
-        AtomicInteger numberOfConstructorParameters = new AtomicInteger(0);
-        new NumberOfConstructorParameters().visit(compilationUnit, numberOfConstructorParameters);
-        return numberOfConstructorParameters.get();
-    }
-
     private Boolean hasConstructor(CompilationUnit compilationUnit) {
         AtomicBoolean hasConstructor = new AtomicBoolean(false);
         new ShouldHaveConstructor().visit(compilationUnit, hasConstructor);
@@ -176,7 +179,7 @@ public class RectangleClassFeedback implements Rule {
 
     private Boolean methodsBreakEncapsulation(CompilationUnit compilationUnit) {
         AtomicBoolean doesMethodsBreakEncapsulation = new AtomicBoolean(false);
-        new MethodNamesShouldNotBreakEncapsulation().visit(compilationUnit,doesMethodsBreakEncapsulation);
+        new MethodNamesShouldNotBreakEncapsulation().visit(compilationUnit, doesMethodsBreakEncapsulation);
         return doesMethodsBreakEncapsulation.get();
     }
 }
