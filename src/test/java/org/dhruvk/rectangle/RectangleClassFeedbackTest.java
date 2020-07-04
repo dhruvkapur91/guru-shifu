@@ -1,5 +1,6 @@
 package org.dhruvk.rectangle;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.Set;
@@ -19,5 +20,21 @@ public class RectangleClassFeedbackTest {
 
         Set<String> feedbacks = new RectangleClassFeedback(sourceCode).suggestionKey();
         assertThat(feedbacks, is(Set.of("NO_CONSTRUCTOR_FOUND")));
+    }
+
+    @Test
+    @Tag("To Remove")
+    void shouldBeUnknownScenario() {
+        String sourceCode = """
+                class Rectangle {
+                   
+                   public Rectangle() {}
+                
+                   public double getArea() {}
+                }
+                """;
+
+        Set<String> feedbacks = new RectangleClassFeedback(sourceCode).suggestionKey();
+        assertThat(feedbacks, is(Set.of("UNKNOWN_SCENARIO")));
     }
 }
