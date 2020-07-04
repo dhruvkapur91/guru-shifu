@@ -30,6 +30,7 @@ public class ShouldHaveCreatedRectangleClass implements Rule {
             if (noJavaFileFound()) feedbacks.add("NO_JAVA_FILE_FOUND");
             if (doesRectangleClassExist()) feedbacks.add("FOUND_RECTANGLE_CLASS");
             if (possibleOverGeneralization()) feedbacks.add("POSSIBLE_OVER_GENERALIZATION");
+            if (usingManagerClasses()) feedbacks.add("AVOID_MANAGER_CLASSES");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -65,6 +66,12 @@ public class ShouldHaveCreatedRectangleClass implements Rule {
         return Files.walk(absoluteSourcePath)
                 .filter(Files::isRegularFile)
                 .anyMatch(file -> file.getFileName().toString().toLowerCase().contains("shape"));
+    }
+
+    private boolean usingManagerClasses() throws IOException {
+        return Files.walk(absoluteSourcePath)
+                .filter(Files::isRegularFile)
+                .anyMatch(file -> file.getFileName().toString().toLowerCase().contains("calculator"));
     }
 
     private Predicate<Path> fileStartsWithALowerCase() {

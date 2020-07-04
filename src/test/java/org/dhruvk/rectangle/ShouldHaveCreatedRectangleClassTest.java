@@ -65,6 +65,18 @@ class ShouldHaveCreatedRectangleClassTest {
     }
 
     @Test
+    void shouldGiveFeedbackIsTheClassNameContainsWordCalculator(@TempDir File someFile) throws Exception {
+        Path path = setupDirectoryStructure(someFile,  "org/dhruvk/rectangle", "RectangleAreaCalculator.java");
+        assertThat(findFeedbackFor(path), is(Set.of("AVOID_MANAGER_CLASSES")));
+    }
+
+    @Test
+    void shouldGiveFeedbackIsTheClassNameContainsWordCalculatorEvenInWeirdCasing(@TempDir File someFile) throws Exception {
+        Path path = setupDirectoryStructure(someFile,  "org/dhruvk/rectangle", "Rectangle_Area_CalcuLator.java");
+        assertThat(findFeedbackFor(path), is(Set.of("AVOID_MANAGER_CLASSES")));
+    }
+
+    @Test
     void shouldReportUnknownScenarioWhenSeeingATypoForNow(@TempDir File someFile) throws Exception {
         Path path = setupDirectoryStructure(someFile, "org/dhruvk/rectangle", "Recangle.java");
         assertThat(findFeedbackFor(path), is(Set.of("UNKNOWN_SCENARIO")));
@@ -81,7 +93,8 @@ class ShouldHaveCreatedRectangleClassTest {
         Path path = setupDirectoryStructure(someFile, "org/dhruvk/rectangle", "rect.java");
         setupDirectoryStructure(someFile, "org/dhruvk/rectangle", "Blah.java");
         setupDirectoryStructure(someFile, "org/dhruvk/rectangle", "Rectangle.java");
-        assertThat(findFeedbackFor(path), containsInAnyOrder("UNNECESSARY_FILES_FOUND","FOUND_RECTANGLE_CLASS","JAVA_FILE_NAMING_CONVENTIONS_NOT_FOLLOWED"));
+        setupDirectoryStructure(someFile, "org/dhruvk/rectangle", "Rectangle_Area_Shape_Calculator.java");
+        assertThat(findFeedbackFor(path), containsInAnyOrder("UNNECESSARY_FILES_FOUND","FOUND_RECTANGLE_CLASS","AVOID_MANAGER_CLASSES","POSSIBLE_OVER_GENERALIZATION","JAVA_FILE_NAMING_CONVENTIONS_NOT_FOLLOWED"));
     }
 
     Set<String> findFeedbackFor(Path path) {
