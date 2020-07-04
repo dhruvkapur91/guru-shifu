@@ -21,22 +21,23 @@ public class ShouldHaveCreatedRectangleClass implements Rule {
     @Override
     public Optional<String> suggestionKey() {
         // TODO, maybe we should return all applicable feedbacks... not just one, and prioritization should be a separate activity...
-        if (moreThanOneFileExists()) return Optional.of("UNNECESSARY_FILES_FOUND");
-        if (lowerCaseClassFilesFound()) return Optional.of("JAVA_FILE_NAMING_CONVENTIONS_NOT_FOLLOWED");
-        if (noJavaFileFound()) return Optional.of("NO_JAVA_FILE_FOUND");
-        if (doesRectangleClassExist()) return Optional.empty();
-        return Optional.of("UNKNOWN_SCENARIO");
+        try {
+            if (moreThanOneFileExists()) return Optional.of("UNNECESSARY_FILES_FOUND");
+            if (lowerCaseClassFilesFound()) return Optional.of("JAVA_FILE_NAMING_CONVENTIONS_NOT_FOLLOWED");
+            if (noJavaFileFound()) return Optional.of("NO_JAVA_FILE_FOUND");
+            if (doesRectangleClassExist()) return Optional.empty();
+            return Optional.of("UNKNOWN_SCENARIO");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
-    private boolean lowerCaseClassFilesFound() {
-        try {
-            return Files.walk(absoluteSourcePath)
-                    .filter(Files::isRegularFile)
-                    .filter(isJavaFile())
-                    .anyMatch(fileStartsWithALowerCase());
-        } catch (IOException e) {
-            throw new RuntimeException(e); // This logic of traversing a path and figuring out if the file is present should likely be extracted out...
-        }
+    private boolean lowerCaseClassFilesFound() throws IOException {
+        return Files.walk(absoluteSourcePath)
+                .filter(Files::isRegularFile)
+                .filter(isJavaFile())
+                .anyMatch(fileStartsWithALowerCase());
     }
 
     private Predicate<Path> fileStartsWithALowerCase() {
