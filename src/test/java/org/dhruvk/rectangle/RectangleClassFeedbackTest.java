@@ -99,11 +99,31 @@ public class RectangleClassFeedbackTest {
 
     @Test
     @Tag("ToRemove")
-    void shouldBeUnknownScenario() {
+    void shouldBeUnknownScenarioIfThereIsAnAreaField() {
         String sourceCode = """
                 class Rectangle {
                 
+                   int area;
+                   
+                   public Rectangle(int length, int breath) {}
+                                
+                   public double getArea() {}
+                }
+                """;
+
+        Set<String> feedbacks = new RectangleClassFeedback(sourceCode).suggestionKey();
+        assertThat(feedbacks, is(Set.of("UNKNOWN_SCENARIO")));
+    }
+
+    @Test
+    @Tag("ToRemove")
+    void shouldBeUnknownScenarioIfThereIsAnAreaFieldInAdditionToLengthAndBreath() {
+        String sourceCode = """
+                class Rectangle {
+                
+                   int area;
                    int length;
+                   int breath;
                    
                    public Rectangle(int length, int breath) {}
                                 
