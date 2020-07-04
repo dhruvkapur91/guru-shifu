@@ -16,9 +16,6 @@ class ShouldHaveConstructor extends VoidVisitorAdapter<AtomicBoolean> {
     public void visit(ConstructorDeclaration constructorDeclaration, AtomicBoolean arg) {
         super.visit(constructorDeclaration, arg);
         arg.set(true);
-        System.out.println("Never came here");
-        NodeList<Parameter> parameters = constructorDeclaration.getParameters();
-        parameters.forEach(p -> System.out.println(p.getName()));
     }
 }
 
