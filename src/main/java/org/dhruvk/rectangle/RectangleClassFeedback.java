@@ -38,6 +38,14 @@ class NumberOfFields extends VoidVisitorAdapter<AtomicInteger> {
     }
 }
 
+class AllFieldsShouldBePrivate extends VoidVisitorAdapter<AtomicBoolean> {
+    @Override
+    public void visit(FieldDeclaration someField, AtomicBoolean arg) {
+        super.visit(someField, arg);
+        if (!someField.isPrivate()) arg.set(true);
+    }
+}
+
 
 public class RectangleClassFeedback implements Rule {
 
@@ -53,32 +61,43 @@ public class RectangleClassFeedback implements Rule {
         CompilationUnit compilationUnit = StaticJavaParser.parse(sourceCode);
         int numberOfConstructorParameters = numberOfConstructorParameters(compilationUnit);
 
-        if(!hasConstructor(compilationUnit)) feedbacks.add("NO_CONSTRUCTOR_FOUND");
-        if(numberOfConstructorParameters == 0) feedbacks.add("NO_CONSTRUCTOR_PARAMETER");
-        if(numberOfConstructorParameters == 1) feedbacks.add("ONLY_ONE_CONSTRUCTOR_PARAMETER");
-        if(numberOfConstructorParameters > 2) feedbacks.add("TOO_MANY_CONSTRUCTOR_PARAMETER");
+        if (!hasConstructor(compilationUnit)) feedbacks.add("NO_CONSTRUCTOR_FOUND");
+        if (numberOfConstructorParameters == 0) feedbacks.add("NO_CONSTRUCTOR_PARAMETER");
+        if (numberOfConstructorParameters == 1) feedbacks.add("ONLY_ONE_CONSTRUCTOR_PARAMETER");
+        if (numberOfConstructorParameters > 2) feedbacks.add("TOO_MANY_CONSTRUCTOR_PARAMETER");
 
         int numberOfFields = numberOfFields(compilationUnit);
-        if(numberOfFields == 0) feedbacks.add("NO_FIELDS_FOUND");
+        if (numberOfFields == 0) feedbacks.add("NO_FIELDS_FOUND");
+
+        if (hasPublicFields(compilationUnit)) feedbacks.add("FIELDS_SHOULD_BE_PRIVATE");
 
         return feedbacks.isEmpty() ? Set.of("UNKNOWN_SCENARIO") : feedbacks;
     }
 
     private int numberOfFields(CompilationUnit compilationUnit) {
         AtomicInteger numberOfFields = new AtomicInteger(0);
-        new NumberOfFields().visit(compilationUnit,numberOfFields);
+        new NumberOfFields().visit(compilationUnit, numberOfFields);
         return numberOfFields.get();
     }
 
     private int numberOfConstructorParameters(CompilationUnit compilationUnit) {
         AtomicInteger numberOfConstructorParameters = new AtomicInteger(0);
-        new NumberOfConstructorParameters().visit(compilationUnit,numberOfConstructorParameters);
+        new NumberOfConstructorParameters().visit(compilationUnit, numberOfConstructorParameters);
         return numberOfConstructorParameters.get();
     }
 
     private Boolean hasConstructor(CompilationUnit compilationUnit) {
         AtomicBoolean hasConstructor = new AtomicBoolean(false);
-        new ShouldHaveConstructor().visit(compilationUnit,hasConstructor);
+        new ShouldHaveConstructor().visit(compilationUnit, hasConstructor);
         return hasConstructor.get();
+    }
+
+    private Boolean hasPublicFields(CompilationUnit compilationUnit) {
+        int numberOfFields = numberOfFields(compilationUnit);
+        AtomicBoolean hasPublicFields = new AtomicBoolean(false);
+        if (numberOfFields > 0) {
+            new AllFieldsShouldBePrivate().visit(compilationUnit, hasPublicFields);
+        }
+        return hasPublicFields.get();
     }
 }

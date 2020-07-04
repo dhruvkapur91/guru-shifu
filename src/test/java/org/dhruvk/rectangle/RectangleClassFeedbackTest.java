@@ -98,12 +98,32 @@ public class RectangleClassFeedbackTest {
     }
 
     @Test
+    void shouldGiveFeedbackIfFieldsAreNotPrivate() {
+        String sourceCode = """
+                class Rectangle {
+                
+                   int length;
+                   int breath;
+                   
+                   public Rectangle(int length, int breath) {}
+                                
+                   public double getArea() {}
+                }
+                """;
+
+        Set<String> feedbacks = new RectangleClassFeedback(sourceCode).suggestionKey();
+        assertThat(feedbacks, containsInAnyOrder(
+                "FIELDS_SHOULD_BE_PRIVATE"
+        ));
+    }
+
+    @Test
     @Tag("ToRemove")
     void shouldBeUnknownScenarioIfThereIsAnAreaField() {
         String sourceCode = """
                 class Rectangle {
                 
-                   int area;
+                   private int area;
                    
                    public Rectangle(int length, int breath) {}
                                 
@@ -121,9 +141,9 @@ public class RectangleClassFeedbackTest {
         String sourceCode = """
                 class Rectangle {
                 
-                   int area;
-                   int length;
-                   int breath;
+                   private int area;
+                   private int length;
+                   private int breath;
                    
                    public Rectangle(int length, int breath) {}
                                 
