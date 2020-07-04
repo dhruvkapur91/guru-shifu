@@ -4,6 +4,7 @@ import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
+import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
@@ -29,6 +30,14 @@ class NumberOfConstructorParameters extends VoidVisitorAdapter<AtomicInteger> {
     }
 }
 
+class NumberOfFields extends VoidVisitorAdapter<AtomicInteger> {
+    @Override
+    public void visit(FieldDeclaration n, AtomicInteger arg) {
+        super.visit(n, arg);
+        arg.incrementAndGet();
+    }
+}
+
 
 public class RectangleClassFeedback implements Rule {
 
@@ -49,7 +58,16 @@ public class RectangleClassFeedback implements Rule {
         if(numberOfConstructorParameters == 1) feedbacks.add("ONLY_ONE_CONSTRUCTOR_PARAMETER");
         if(numberOfConstructorParameters > 2) feedbacks.add("TOO_MANY_CONSTRUCTOR_PARAMETER");
 
+        int numberOfFields = numberOfFields(compilationUnit);
+        if(numberOfFields == 0) feedbacks.add("NO_FIELDS_FOUND");
+
         return feedbacks.isEmpty() ? Set.of("UNKNOWN_SCENARIO") : feedbacks;
+    }
+
+    private int numberOfFields(CompilationUnit compilationUnit) {
+        AtomicInteger numberOfFields = new AtomicInteger(0);
+        new NumberOfFields().visit(compilationUnit,numberOfFields);
+        return numberOfFields.get();
     }
 
     private int numberOfConstructorParameters(CompilationUnit compilationUnit) {
