@@ -81,7 +81,7 @@ class RectangleCodeMetrics {
     }
 }
 
-class GetFeedback extends VoidVisitorAdapter<RectangleCodeMetrics> {
+class PopulateRectangleCodeMetrics extends VoidVisitorAdapter<RectangleCodeMetrics> {
     @Override
     public void visit(ClassOrInterfaceDeclaration n, RectangleCodeMetrics metrics) {
         super.visit(n, metrics);
@@ -130,7 +130,7 @@ public class RectangleClassFeedback implements Rule {
         RectangleCodeMetrics rectangleCodeMetrics = new RectangleCodeMetrics();
         CompilationUnit compilationUnit = StaticJavaParser.parse(sourceCode);
 
-        new GetFeedback().visit(compilationUnit, rectangleCodeMetrics);
+        new PopulateRectangleCodeMetrics().visit(compilationUnit, rectangleCodeMetrics);
 
         return rectangleCodeMetrics.getFeedbacks().isEmpty() ? Set.of("UNKNOWN_SCENARIO") : rectangleCodeMetrics.getFeedbacks();
     }
