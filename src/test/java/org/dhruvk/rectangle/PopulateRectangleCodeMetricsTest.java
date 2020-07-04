@@ -67,7 +67,7 @@ class PopulateRectangleCodeMetricsTest {
                 .map(x -> {
                     String testExpression = rectangleCodeMetrics.invokeExpression(x.getKey()).get();
                     String value = jShell.eval(testExpression).get(0).value();
-                    return Map.entry(Map.entry(x.getKey(), x.getValue()), Integer.parseInt(value) == x.getValue());
+                    return Map.entry(x, Integer.parseInt(value) == x.getValue());
                 }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
         assertTrue(collect.values().stream().allMatch(p -> p.equals(TRUE)));
