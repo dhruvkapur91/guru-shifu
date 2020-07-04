@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 import static org.apache.commons.io.FilenameUtils.getExtension;
 
@@ -30,15 +31,15 @@ public class ShouldHaveCreatedRectangleClass implements Rule {
             long count = Files.walk(sourcePath)
                     .filter(Files::isRegularFile)
                     .filter(file -> getExtension(file.toString()).equals("java"))
-                    .filter(file -> file.startsWith("[a-z]+"))
+                    .filter(file -> Pattern.compile("[a-z]+.*").matcher(file.getFileName().toString()).matches())
                     .count();
             if (count == 0) {
-                return true;
+                return false;
             }
         } catch (IOException e) {
             throw new RuntimeException(e); // This logic of traversing a path and figuring out if the file is present should likely be extracted out...
         }
-        return false;
+        return true;
     }
 
     private boolean noJavaFileFound() { // TODO - wait for removing the duplication of the Files API... lets see enough of it to understand what will be a good abstraction
