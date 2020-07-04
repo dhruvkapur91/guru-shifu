@@ -20,9 +20,9 @@ public class ShouldHaveCreatedRectangleClass implements Rule {
     @Override
     public Optional<String> suggestionKey() {
         if (moreThanOneFileExists()) return Optional.of("UNNECESSARY_FILES_FOUND");
-        if (doesRectangleClassExist()) return Optional.empty();
-        if (noJavaFileFound()) return Optional.of("NO_JAVA_FILE_FOUND");
         if (lowerCaseClassFilesFound()) return Optional.of("JAVA_FILE_NAMING_CONVENTIONS_NOT_FOLLOWED");
+        if (noJavaFileFound()) return Optional.of("NO_JAVA_FILE_FOUND");
+        if (doesRectangleClassExist()) return Optional.empty();
         return Optional.of("UNKNOWN_SCENARIO");
     }
 
