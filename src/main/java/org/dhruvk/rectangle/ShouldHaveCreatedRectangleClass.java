@@ -1,5 +1,6 @@
 package org.dhruvk.rectangle;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -32,18 +33,13 @@ public class ShouldHaveCreatedRectangleClass implements Rule {
         String filesStartWithLowerCase = "[a-z]+.*";
 
         try {
-            long numberOfJavaFilesWithLowerCase = Files.walk(absoluteSourcePath)
+            return Files.walk(absoluteSourcePath)
                     .filter(Files::isRegularFile)
                     .filter(isJavaFile())
-                    .filter(file -> Pattern.compile(filesStartWithLowerCase).matcher(file.getFileName().toString()).matches())
-                    .count();
-            if (numberOfJavaFilesWithLowerCase == 0) {
-                return false;
-            }
+                    .anyMatch(file -> Pattern.compile(filesStartWithLowerCase).matcher(file.getFileName().toString()).matches());
         } catch (IOException e) {
             throw new RuntimeException(e); // This logic of traversing a path and figuring out if the file is present should likely be extracted out...
         }
-        return true;
     }
 
     private boolean noJavaFileFound() { // TODO - wait for removing the duplication of the Files API... lets see enough of it to understand what will be a good abstraction
