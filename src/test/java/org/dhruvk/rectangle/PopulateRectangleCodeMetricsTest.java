@@ -22,7 +22,7 @@ This is of course after it compiles
 We need to be careful that this code runs either locally (which is preferable) but if we are running it in server, it needs to be sandboxed
  */
 
-
+// TODO - the setup fo these tests is somewhat complicated.. should think more...
 class PopulateRectangleCodeMetricsTest {
 
     List<ReferenceRectangle> referenceRectangles = List.of(
@@ -38,7 +38,7 @@ class PopulateRectangleCodeMetricsTest {
 
     @Test
     void shouldPopulateInvokeExpressionCorrectly() {
-        String sourceCode = """
+        String someImplementation = """
                 class Rectangle {
                     private final int length;
                     private final int breath;
@@ -53,26 +53,41 @@ class PopulateRectangleCodeMetricsTest {
                     }
                 }
                 """;
-        CompilationUnit compilationUnit = StaticJavaParser.parse(sourceCode);
+        JShell jShell = getjShell(someImplementation);
+        RectangleCodeMetrics rectangleCodeMetrics = populateRectangleCodeMetrics(someImplementation);
 
-        RectangleCodeMetrics rectangleCodeMetrics = new RectangleCodeMetrics();
-        new PopulateRectangleCodeMetrics().visit(compilationUnit, rectangleCodeMetrics);
-
-        JShell jShell = JShell.create();
-        jShell.eval(sourceCode);
-
-        Map<ReferenceRectangle, Boolean> collect = referenceRectangles
-                .stream()
-                .map(referenceRectangle -> {
-                    String testExpression = rectangleCodeMetrics.invokeExpression(referenceRectangle).get();
-                    String value = jShell.eval(testExpression).get(0).value();
-                    return Map.entry(referenceRectangle, Integer.parseInt(value) == referenceRectangle.area());
-                }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-
-        assertTrue(collect.values().stream().allMatch(p -> p.equals(TRUE)));
+        verifyForAllInputs(jShell, rectangleCodeMetrics);
 
         jShell.close(); // TODO - should use closable syntax
 
+    }
+
+    private JShell getjShell(String someImplementation) {
+        JShell jShell = JShell.create();
+        jShell.eval(someImplementation);
+        return jShell;
+    }
+
+    private RectangleCodeMetrics populateRectangleCodeMetrics(String someImplementation) {
+        CompilationUnit compilationUnit = StaticJavaParser.parse(someImplementation);
+        RectangleCodeMetrics rectangleCodeMetrics = new RectangleCodeMetrics();
+        new PopulateRectangleCodeMetrics().visit(compilationUnit, rectangleCodeMetrics);
+        return rectangleCodeMetrics;
+    }
+
+    private void verifyForAllInputs(JShell jShell, RectangleCodeMetrics rectangleCodeMetrics) {
+        Map<ReferenceRectangle, Boolean> collect = referenceRectangles
+                .stream()
+                .map(referenceRectangle -> verifyOne(jShell, rectangleCodeMetrics, referenceRectangle))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        assertTrue(collect.values().stream().allMatch(p -> p.equals(TRUE)));
+    }
+
+    private Map.Entry<ReferenceRectangle, Boolean> verifyOne(JShell jShell, RectangleCodeMetrics rectangleCodeMetrics, ReferenceRectangle referenceRectangle) {
+        String testExpression = rectangleCodeMetrics.invokeExpression(referenceRectangle).get();
+        String value = jShell.eval(testExpression).get(0).value();
+        return Map.entry(referenceRectangle, Integer.parseInt(value) == referenceRectangle.area());
     }
 
 }
