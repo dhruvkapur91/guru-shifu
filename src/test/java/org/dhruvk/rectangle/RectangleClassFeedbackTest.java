@@ -15,6 +15,17 @@ import static org.hamcrest.Matchers.is;
 public class RectangleClassFeedbackTest {
 
     @Test
+    void shouldGiveFeedbackIfThereIsNoClass() {
+        Set<String> feedbacks = new RectangleClassFeedback("").suggestionKey();
+        assertThat(feedbacks, containsInAnyOrder(
+                "NO_CONSTRUCTOR_FOUND",
+                "NO_CONSTRUCTOR_PARAMETER",
+                "NO_FIELDS_FOUND",
+                "NO_CLASS_FOUND"
+        ));
+    }
+
+    @Test
     void shouldGiveFeedbackIfThereIsNoConstructor() {
         String sourceCode = """
                 class Rectangle {
