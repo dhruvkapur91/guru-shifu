@@ -13,6 +13,7 @@ import static org.apache.commons.io.FilenameUtils.getExtension;
 public class ShouldHaveCreatedRectangleClass implements Rule {
 
     private final Path absoluteSourcePath;
+    private static final Pattern fileStartsWithLowerCase = Pattern.compile("[a-z]+.*");
 
     public ShouldHaveCreatedRectangleClass(Path sourceAbsolutePath) {
         assert sourceAbsolutePath.startsWith("/") : "Expected absolute path, but looks like you passed a relative path -> " + sourceAbsolutePath;
@@ -30,13 +31,11 @@ public class ShouldHaveCreatedRectangleClass implements Rule {
     }
 
     private boolean lowerCaseClassFilesFound() {
-        String filesStartWithLowerCase = "[a-z]+.*";
-
         try {
             return Files.walk(absoluteSourcePath)
                     .filter(Files::isRegularFile)
                     .filter(isJavaFile())
-                    .anyMatch(file -> Pattern.compile(filesStartWithLowerCase).matcher(file.getFileName().toString()).matches());
+                    .anyMatch(file -> fileStartsWithLowerCase.matcher(file.getFileName().toString()).matches());
         } catch (IOException e) {
             throw new RuntimeException(e); // This logic of traversing a path and figuring out if the file is present should likely be extracted out...
         }
