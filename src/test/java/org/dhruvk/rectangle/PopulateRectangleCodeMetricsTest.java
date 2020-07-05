@@ -230,7 +230,7 @@ class PopulateRectangleCodeMetricsTest {
     }
 
     private void verifyOne(JShell jShell, RectangleCodeMetrics rectangleCodeMetrics, ReferenceRectangleImplementation referenceRectangle) {
-        List<String> testStatements = convert(rectangleCodeMetrics.getTestStatements(referenceRectangle));
+        List<String> testStatements = convertScalaSeqToJavaList(rectangleCodeMetrics.getTestStatements(referenceRectangle));
         if(testStatements.isEmpty()) {
             fail("Unable to find the invoke expression");
         }
@@ -249,7 +249,7 @@ class PopulateRectangleCodeMetricsTest {
 
     }
 
-    public static List<String> convert(Seq<String> testStatements) {
+    public static List<String> convertScalaSeqToJavaList(Seq<String> testStatements) {
         List<String> strings = new ArrayList<>();
         testStatements.foreach(strings::add);
         return strings;
