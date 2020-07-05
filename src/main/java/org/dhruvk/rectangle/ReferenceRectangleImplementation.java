@@ -2,7 +2,7 @@ package org.dhruvk.rectangle;
 
 import java.util.Objects;
 
-class ReferenceRectangle {
+class ReferenceRectangleImplementation {
     public final int length;
     public final int breath;
 
@@ -14,7 +14,7 @@ class ReferenceRectangle {
         return breath;
     }
 
-    public ReferenceRectangle(int length, int breath) {
+    public ReferenceRectangleImplementation(int length, int breath) {
         this.length = length;
         this.breath = breath;
     }
@@ -27,7 +27,7 @@ class ReferenceRectangle {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ReferenceRectangle that = (ReferenceRectangle) o;
+        ReferenceRectangleImplementation that = (ReferenceRectangleImplementation) o;
         return length == that.length &&
                 breath == that.breath;
     }

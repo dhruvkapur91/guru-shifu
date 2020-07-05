@@ -99,10 +99,12 @@ case class RectangleCodeMetrics() {
     this.hasSetterMethods = true
   }
 
-  def getTestStatements(rectangle: ReferenceRectangle): Seq[String] = { // TODO - should likely extract these conditions out
+  def getTestStatements(rectangle: ReferenceRectangleImplementation): Seq[String] = { // TODO - should likely extract these conditions out
     // TODO - add appropriate feedbacks in these cases
 
     val configuration = GeneralCodeFeatures(hasDefinedClass, hasCallableMethod, numberOfConstructorParameters, numberOfCallableMethodParameters, hasConstructor, isCallableMethodStatic, hasSetterMethods)
+
+    // TODO - there should be a way  of naming these case statements, but currently I'm struggling to do that...
 
     configuration match {
       case GeneralCodeFeatures(false, _, _, _, _, _, _) => throw new RuntimeException("Did not find a class")

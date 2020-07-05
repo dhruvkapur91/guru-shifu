@@ -26,14 +26,14 @@ We need to be careful that this code runs either locally (which is preferable) b
 // TODO - the setup fo these tests is somewhat complicated.. should think more...
 class PopulateRectangleCodeMetricsTest {
 
-    List<ReferenceRectangle> referenceRectangles = List.of(
-            new ReferenceRectangle(0, 0),
-            new ReferenceRectangle(0, 1),
-            new ReferenceRectangle(1, 0),
-            new ReferenceRectangle(1, 1),
-            new ReferenceRectangle(2, 1),
-            new ReferenceRectangle(1, 2),
-            new ReferenceRectangle(10, 20)
+    List<ReferenceRectangleImplementation> referenceRectangles = List.of(
+            new ReferenceRectangleImplementation(0, 0),
+            new ReferenceRectangleImplementation(0, 1),
+            new ReferenceRectangleImplementation(1, 0),
+            new ReferenceRectangleImplementation(1, 1),
+            new ReferenceRectangleImplementation(2, 1),
+            new ReferenceRectangleImplementation(1, 2),
+            new ReferenceRectangleImplementation(10, 20)
     );
 
 
@@ -229,7 +229,7 @@ class PopulateRectangleCodeMetricsTest {
 
     }
 
-    private void verifyOne(JShell jShell, RectangleCodeMetrics rectangleCodeMetrics, ReferenceRectangle referenceRectangle) {
+    private void verifyOne(JShell jShell, RectangleCodeMetrics rectangleCodeMetrics, ReferenceRectangleImplementation referenceRectangle) {
         List<String> testStatements = convert(rectangleCodeMetrics.getTestStatements(referenceRectangle));
         if(testStatements.isEmpty()) {
             fail("Unable to find the invoke expression");
