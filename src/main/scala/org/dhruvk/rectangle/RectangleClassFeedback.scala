@@ -13,7 +13,7 @@ class RectangleClassFeedback(val sourceCode: String) {
     val compilationUnit: CompilationUnit = StaticJavaParser.parse(sourceCode)
     new PopulateRectangleCodeMetrics().visit(compilationUnit, rectangleCodeMetrics)
     if (rectangleCodeMetrics.getFeedbacks.isEmpty) Set("UNKNOWN_SCENARIO")
-    else rectangleCodeMetrics.getFeedbacks.toSet
+    else rectangleCodeMetrics.getFeedbacks
   }
 }
 
