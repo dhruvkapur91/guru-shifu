@@ -52,8 +52,8 @@ case class RectangleCodeMetrics() {
     this.hasDefinedClass = true;
   }
 
-  def incrementConstructorParameter(): Unit = {
-    numberOfConstructorParameters += 1
+  def setNumberOfConstructorParameters(count : Int) : Unit = {
+    numberOfConstructorParameters = count
   }
 
   def markHasSomeNonPrivateFields(): Unit = {

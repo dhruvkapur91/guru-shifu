@@ -3,6 +3,7 @@ package org.dhruvk.rectangle
 import com.github.javaparser.ast.body._
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter
 
+// This will usually be created per requirement to populate its associated metrics
 class PopulateRectangleCodeMetrics extends VoidVisitorAdapter[RectangleCodeMetrics] {
   override def visit(n: ClassOrInterfaceDeclaration, metrics: RectangleCodeMetrics): Unit = {
     super.visit(n, metrics)
@@ -14,7 +15,7 @@ class PopulateRectangleCodeMetrics extends VoidVisitorAdapter[RectangleCodeMetri
     super.visit(constructorDeclaration, arg)
     arg.markHasConstructor()
     val parameters = constructorDeclaration.getParameters
-    parameters.forEach((p: Parameter) => arg.incrementConstructorParameter())
+    arg.setNumberOfConstructorParameters(parameters.size())
   }
 
   override def visit(someField: FieldDeclaration, arg: RectangleCodeMetrics): Unit = {
