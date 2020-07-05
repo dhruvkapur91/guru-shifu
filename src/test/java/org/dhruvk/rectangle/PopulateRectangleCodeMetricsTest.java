@@ -206,6 +206,39 @@ class PopulateRectangleCodeMetricsTest {
 
     }
 
+    @Test
+    void shouldPopulateInvokeExpressionCorrectlyIfSettersAreUsedEvenIfSettersAreNamedDifferently() {
+        String someImplementation = """
+                class Rectangle {
+                
+                    int length;
+                    int breath;
+                    
+                    public Rectangle() {
+                    }
+                    
+                    public void length(int length) {
+                        this.length = length;
+                    }
+                    
+                    public void breath(int breath) {
+                        this.breath = breath;
+                    }
+                
+                    public int calculate_area() {
+                        return length * breath;
+                    }
+                }
+                """;
+        JShell jShell = getjShell(someImplementation);
+        RectangleCodeMetrics rectangleCodeMetrics = populateRectangleCodeMetrics(someImplementation);
+
+        verifyForAllInputs(jShell, rectangleCodeMetrics);
+
+        jShell.close(); // TODO - should use closable syntax
+
+    }
+
 
     private JShell getjShell(String someImplementation) {
         JShell jShell = JShell.create();

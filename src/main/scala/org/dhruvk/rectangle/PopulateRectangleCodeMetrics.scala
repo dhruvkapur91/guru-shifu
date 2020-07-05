@@ -34,6 +34,10 @@ class PopulateRectangleCodeMetrics extends VoidVisitorAdapter[RectangleCodeMetri
     val containsCalculate = someMethod.getNameAsString.toLowerCase.contains("calculate")
     if (containsGet || containsCalculate) arg.markSomeMethodNameBreaksEncapsulation()
     if (someMethod.getNameAsString.toLowerCase.contains("set")) arg.markHasSetterMethods()
+    if (someMethod.getParameters.size() == 1 && someMethod.getType.isVoidType) { // possibly a setter - heuristic
+      arg.markHasSetterMethods()
+      arg.addASetterMethod(someMethod.getNameAsString)
+    }
     if (someMethod.isPublic) arg.setCallableMethod(someMethod.getNameAsString)
     if (someMethod.isPublic && someMethod.isStatic) {
       arg.setCallableMethod(someMethod.getNameAsString)

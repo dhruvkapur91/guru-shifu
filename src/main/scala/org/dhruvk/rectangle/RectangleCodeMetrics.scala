@@ -3,6 +3,7 @@ package org.dhruvk.rectangle
 import org.dhruvk.rectangle.RectangleCodeMetrics._
 
 import scala.collection.mutable
+import scala.collection.mutable.ArrayBuffer
 
 case class GeneralCodeFeatures(
                                 hasDefinedClass: Boolean,
@@ -28,6 +29,12 @@ case class RectangleCodeMetrics() {
   private var hasConstructor: Boolean = false
   private var isCallableMethodStatic: Boolean = false
   private var numberOfCallableMethodParameters: Int = 0
+  private val setterMethodNames: mutable.Buffer[String] = mutable.Buffer.empty
+
+  def addASetterMethod(name : String): Unit = {
+    markHasSetterMethods()
+    setterMethodNames += name
+  }
 
   feedbacks += NO_CLASS_FOUND
   feedbacks += NO_CONSTRUCTOR_FOUND
@@ -114,11 +121,12 @@ case class RectangleCodeMetrics() {
       case GeneralCodeFeatures(_, _, 0, 2, false, true, _) => return Seq(s"${getClassName.get}.${getCallableMethod.get}(${rectangle.length},${rectangle.breath})")
       case GeneralCodeFeatures(_, _, 0, 2, true, true, _) => return Seq(s"${getClassName.get}.${getCallableMethod.get}(${rectangle.length},${rectangle.breath})")
       case GeneralCodeFeatures(_, _, 0, 0, _, _, true) => return Seq(
-        "Rectangle rectangle = new Rectangle();",
-        s"rectangle.setLength(${rectangle.length});",
-        s"rectangle.setBreath(${rectangle.breath});",
+        s"$className rectangle = new $className();",
+        s"rectangle.${setterMethodNames(0)}(${rectangle.length});",
+        s"rectangle.${setterMethodNames(1)}(${rectangle.breath});",
         "rectangle.calculate_area();"
       )
+      case _ => throw new RuntimeException("This path is not coded!")
 
     }
 
