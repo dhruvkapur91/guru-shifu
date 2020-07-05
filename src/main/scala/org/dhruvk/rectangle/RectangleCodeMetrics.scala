@@ -4,6 +4,16 @@ import org.dhruvk.rectangle.RectangleCodeMetrics._
 
 import scala.collection.mutable
 
+case class GeneralCodeFeatures(
+                                hasDefinedClass: Boolean,
+                                hasCallableMethod: Boolean,
+                                numberOfConstructorParameters: Int,
+                                numberOfCallableMethodParameters: Int,
+                                hasConstructor: Boolean,
+                                isCallableMethodStatic: Boolean,
+                                hasSetterMethods: Boolean
+                              )
+
 case class RectangleCodeMetrics() {
 
 
@@ -92,22 +102,21 @@ case class RectangleCodeMetrics() {
   def getTestStatements(rectangle: ReferenceRectangle): Seq[String] = { // TODO - should likely extract these conditions out
     // TODO - add appropriate feedbacks in these cases
 
-    val configuration = (hasDefinedClass, hasCallableMethod, numberOfConstructorParameters, numberOfCallableMethodParameters, hasConstructor, isCallableMethodStatic, hasSetterMethods)
+    val configuration = GeneralCodeFeatures(hasDefinedClass, hasCallableMethod, numberOfConstructorParameters, numberOfCallableMethodParameters, hasConstructor, isCallableMethodStatic, hasSetterMethods)
 
     configuration match {
-      case (false, _, _, _, _, _, _) => throw new RuntimeException("Did not find a class")
-      case (_, false, _, _, _, _, _) => throw new RuntimeException("Did not find a method that can be called")
-      case (_, _, 2, 0, _, _, _) => return Seq(s"new ${getClassName.get}(${rectangle.length},${rectangle.breath}).${getCallableMethod.get}()")
-      case (_, _, 0, 2, false, false, _) => return Seq(s"new ${getClassName.get}().${getCallableMethod.get}(${rectangle.length},${rectangle.breath})")
-      case (_, _, 0, 2, false, true, _) => return Seq(s"${getClassName.get}.${getCallableMethod.get}(${rectangle.length},${rectangle.breath})")
-      case (_, _, 0, 2, true, true, _) => return Seq(s"${getClassName.get}.${getCallableMethod.get}(${rectangle.length},${rectangle.breath})")
-      case (_, _, 0, 0, _, _, true) => return Seq(
+      case GeneralCodeFeatures(false, _, _, _, _, _, _) => throw new RuntimeException("Did not find a class")
+      case GeneralCodeFeatures(_, false, _, _, _, _, _) => throw new RuntimeException("Did not find a method that can be called")
+      case GeneralCodeFeatures(_, _, 2, 0, _, _, _) => return Seq(s"new ${getClassName.get}(${rectangle.length},${rectangle.breath}).${getCallableMethod.get}()")
+      case GeneralCodeFeatures(_, _, 0, 2, false, false, _) => return Seq(s"new ${getClassName.get}().${getCallableMethod.get}(${rectangle.length},${rectangle.breath})")
+      case GeneralCodeFeatures(_, _, 0, 2, false, true, _) => return Seq(s"${getClassName.get}.${getCallableMethod.get}(${rectangle.length},${rectangle.breath})")
+      case GeneralCodeFeatures(_, _, 0, 2, true, true, _) => return Seq(s"${getClassName.get}.${getCallableMethod.get}(${rectangle.length},${rectangle.breath})")
+      case GeneralCodeFeatures(_, _, 0, 0, _, _, true) => return Seq(
         "Rectangle rectangle = new Rectangle();",
         s"rectangle.setLength(${rectangle.length});",
         s"rectangle.setBreath(${rectangle.breath});",
         "rectangle.calculate_area();"
       )
-      case _ => ""
 
     }
 
