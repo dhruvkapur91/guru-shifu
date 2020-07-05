@@ -6,9 +6,11 @@ import jdk.jshell.JShell;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /*
 I think the biggest difference b/w Exercism and us is that Exercism enforces an API, while we want people to come up with it... that means its harder to run tests to check functionality... Does it work? Hard to answer if API is unknown
@@ -78,7 +80,11 @@ class PopulateRectangleCodeMetricsTest {
     }
 
     private void verifyOne(JShell jShell, RectangleCodeMetrics rectangleCodeMetrics, ReferenceRectangle referenceRectangle) {
-        String testExpression = rectangleCodeMetrics.invokeExpression(referenceRectangle).get();
+        Optional<String> optionalTestExpression = rectangleCodeMetrics.invokeExpression(referenceRectangle);
+        if(optionalTestExpression.isEmpty()) {
+            fail("Unable to find the invoke expression");
+        }
+        String testExpression = optionalTestExpression.get();
         String value = jShell.eval(testExpression).get(0).value();
         assertThat("Expected value %s to be %d".formatted(value, referenceRectangle.area()),Integer.parseInt(value), is(referenceRectangle.area()));
     }
