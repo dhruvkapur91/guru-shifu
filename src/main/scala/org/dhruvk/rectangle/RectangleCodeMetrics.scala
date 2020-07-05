@@ -70,10 +70,10 @@ case class RectangleCodeMetrics() {
     configuration match {
       case GeneralCodeFeatures(false, _, _, _, _, _, _) => throw new RuntimeException("Did not find a class")
       case GeneralCodeFeatures(_, false, _, _, _, _, _) => throw new RuntimeException("Did not find a method that can be called")
-      case GeneralCodeFeatures(_, _, 2, 0, _, _, _) => return Seq(s"new ${getClassName.get}(${rectangle.length},${rectangle.breath}).${getCallableMethod.get}()")
-      case GeneralCodeFeatures(_, _, 0, 2, false, false, _) => return Seq(s"new ${getClassName.get}().${getCallableMethod.get}(${rectangle.length},${rectangle.breath})")
-      case GeneralCodeFeatures(_, _, 0, 2, false, true, _) => return Seq(s"${getClassName.get}.${getCallableMethod.get}(${rectangle.length},${rectangle.breath})")
-      case GeneralCodeFeatures(_, _, 0, 2, true, true, _) => return Seq(s"${getClassName.get}.${getCallableMethod.get}(${rectangle.length},${rectangle.breath})")
+      case GeneralCodeFeatures(_, _, 2, 0, _, _, _) => return Seq(s"new ${className}(${rectangle.length},${rectangle.breath}).${callableMethod}()")
+      case GeneralCodeFeatures(_, _, 0, 2, false, false, _) => return Seq(s"new ${className}().${callableMethod}(${rectangle.length},${rectangle.breath})")
+      case GeneralCodeFeatures(_, _, 0, 2, false, true, _) => return Seq(s"${className}.${callableMethod}(${rectangle.length},${rectangle.breath})")
+      case GeneralCodeFeatures(_, _, 0, 2, true, true, _) => return Seq(s"${className}.${callableMethod}(${rectangle.length},${rectangle.breath})")
       case GeneralCodeFeatures(_, _, 0, 0, _, _, true) => return Seq(
         s"$className rectangle = new $className();",
         s"rectangle.${setterMethodNames(0)}(${rectangle.length});",
@@ -124,10 +124,6 @@ case class RectangleCodeMetrics() {
     feedbacks.add(FIELDS_CAN_BE_FINAL)
   }
 
-  private def getClassName = Option(className)
-
-  private def getCallableMethod = Option(callableMethod)
-
   def setClassName(nameAsString: String): Unit = {
     className = nameAsString
   }
@@ -148,7 +144,6 @@ case class RectangleCodeMetrics() {
   def setNumberOfCallableMethodParameters(number: Int): Unit = {
     this.numberOfCallableMethodParameters = number
   }
-
 
 }
 
