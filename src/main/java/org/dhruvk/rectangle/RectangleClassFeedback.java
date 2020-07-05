@@ -27,6 +27,7 @@ class RectangleCodeMetrics {
     private String className;
     private String callableMethod;
     private boolean hasConstructor = false;
+    private boolean isCallableMethodStatic = false;
 
     RectangleCodeMetrics() {
         feedbacks.addAll(
@@ -99,9 +100,14 @@ class RectangleCodeMetrics {
         this.callableMethod = callableMethod;
     }
 
+    public void markCallableMethodIsStatic() {
+        this.isCallableMethodStatic = true;
+    }
+
     // TODO - maybe we can use java-parser for generating the call expressions too, but couldn't find a way to do it as of now...
     public Optional<String> invokeExpression(ReferenceRectangle rectangle) {
         // TODO - should likely extract these conditions out
+        // TODO - add appropriate feedbacks in these cases
         if (numberOfConstructorParameters == 2 && getClassName().isPresent() && getCallableMethod().isPresent()) {
             return Optional.of("new %s(%d,%d).%s()".formatted(
                     getClassName().get(),
@@ -112,8 +118,17 @@ class RectangleCodeMetrics {
         }
 
         // Assuming we use default constructor and some public callable method is present with 2 args
-        if (!hasConstructor && getCallableMethod().isPresent()) {
+        if (!hasConstructor && getCallableMethod().isPresent() && !isCallableMethodStatic) {
             return Optional.of("new %s().%s(%d,%d)".formatted(
+                    getClassName().get(),
+                    getCallableMethod().get(),
+                    rectangle.getLength(),
+                    rectangle.getBreath()
+                    ));
+        }
+
+        if (!hasConstructor && getCallableMethod().isPresent() && isCallableMethodStatic) {
+            return Optional.of("%s.%s(%d,%d)".formatted(
                     getClassName().get(),
                     getCallableMethod().get(),
                     rectangle.getLength(),

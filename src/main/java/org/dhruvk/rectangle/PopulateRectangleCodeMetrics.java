@@ -41,5 +41,9 @@ class PopulateRectangleCodeMetrics extends VoidVisitorAdapter<RectangleCodeMetri
         if(someMethod.isPublic()) {
             arg.setCallableMethod(someMethod.getNameAsString());
         }
+        if(someMethod.isPublic() && someMethod.isStatic()) {
+            arg.setCallableMethod(someMethod.getNameAsString());
+            arg.markCallableMethodIsStatic();
+        }
     }
 }
