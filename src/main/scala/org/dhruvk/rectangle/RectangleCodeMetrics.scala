@@ -5,9 +5,13 @@ import org.dhruvk.rectangle.RectangleCodeMetrics._
 import scala.collection.mutable
 
 case class RectangleCodeMetrics() {
+
+
   private var hasSetterMethods: Boolean = false
   private val feedbacks: mutable.Set[String] = new mutable.HashSet[String] // TODO - think list or set, currently we maybe loosing information by keeping it a set.... I think we should have a list internally and a set externally... but this will do for now...
 
+  private var hasCallableMethod = false
+  private var hasDefinedClass = false
   private var numberOfConstructorParameters: Int = 0
   private var className: String = _
   private var callableMethod: String = _
@@ -28,6 +32,7 @@ case class RectangleCodeMetrics() {
 
   def setHasDefinedClass(): Unit = {
     feedbacks.remove(NO_CLASS_FOUND)
+    this.hasDefinedClass = true;
   }
 
   def incrementConstructorParameter(): Unit = {
@@ -73,6 +78,7 @@ case class RectangleCodeMetrics() {
 
   def setCallableMethod(callableMethod: String): Unit = {
     this.callableMethod = callableMethod
+    this.hasCallableMethod = true
   }
 
   def markCallableMethodIsStatic(): Unit = {
@@ -86,8 +92,14 @@ case class RectangleCodeMetrics() {
   def getTestStatements(rectangle: ReferenceRectangle): Seq[String] = { // TODO - should likely extract these conditions out
     // TODO - add appropriate feedbacks in these cases
 
-    if (numberOfConstructorParameters == 2 && getClassName.isDefined && getCallableMethod.isDefined && numberOfCallableMethodParameters == 0) return Seq(s"new ${getClassName.get}(${rectangle.length},${rectangle.breath}).${getCallableMethod.get}()")
+    val configuration = (hasDefinedClass,hasCallableMethod,numberOfConstructorParameters,numberOfCallableMethodParameters)
 
+    configuration match {
+      case (false,_,_,_) => throw new RuntimeException("Did not find a class")
+      case (_,false,_,_) => throw new RuntimeException("Did not find a method that can be called")
+      case (_,_,2,0) => return Seq(s"new ${getClassName.get}(${rectangle.length},${rectangle.breath}).${getCallableMethod.get}()")
+      case _ => ""
+    }
 
 
     //
