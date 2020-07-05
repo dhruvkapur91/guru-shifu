@@ -86,6 +86,33 @@ class PopulateRectangleCodeMetricsTest {
 
     }
 
+    @Test
+    void shouldPopulateInvokeExpressionCorrectlyEvenIfPublicMethodBreaksEncapsulationAndSomeJavaConventions() {
+        String someImplementation = """
+                class Rectangle {
+                    private final int length;
+                    private final int breath;
+                    
+                    public Rectangle(int length, int breath) {
+                        this.length = length;
+                        this.breath = breath;
+                    }
+                    
+                    public int calculate_area() {
+                        return length * breath;
+                    }
+                }
+                """;
+        JShell jShell = getjShell(someImplementation);
+        RectangleCodeMetrics rectangleCodeMetrics = populateRectangleCodeMetrics(someImplementation);
+
+        verifyForAllInputs(jShell, rectangleCodeMetrics);
+
+        jShell.close(); // TODO - should use closable syntax
+
+    }
+
+
     private JShell getjShell(String someImplementation) {
         JShell jShell = JShell.create();
         jShell.eval(someImplementation);
