@@ -18,7 +18,14 @@ import scala.collection.mutable.ArrayBuffer
 
 // Reminder to self - Running part, the test statemets is really imporant... because that validates that I understood the participant's implementation correcntly..
 
-case class GeneralCodeFeatures(
+// So I think the overall structure will be
+// 1. One fat model/configuration space/feature spec per requirement
+// 2. N number of visitors based on file structure, each updating the same fat model
+// 2.5 A converstion of fat model to "requirement met" checker
+// 3. Feedback comes as a pattern match over the configuration space
+// 4. Progress comes as changes in the configuration space
+
+case class RectangleCodeFeatures(
                                 hasDefinedClass: Boolean,
                                 hasCallableMethod: Boolean,
                                 numberOfConstructorParameters: Int,
@@ -26,7 +33,29 @@ case class GeneralCodeFeatures(
                                 hasConstructor: Boolean,
                                 isCallableMethodStatic: Boolean,
                                 hasSetterMethods: Boolean
-                              )
+                              ) {
+  def statements(className : String, rect : ReferenceRectangleImplementation, callableMethod : String, setterMethods : Seq[String]): Seq[String] = {
+    val length = rect.length
+    val breath = rect.breath
+
+    this match {
+      case RectangleCodeFeatures(false, _, _, _, _, _, _) => throw new RuntimeException("Did not find a class")
+      case RectangleCodeFeatures(_, false, _, _, _, _, _) => throw new RuntimeException("Did not find a method that can be called")
+      case RectangleCodeFeatures(_, _, 2, 0, _, _, _) => return Seq(s"new ${className}($length,$breath).${callableMethod}()")
+      case RectangleCodeFeatures(_, _, 0, 2, false, false, _) => return Seq(s"new ${className}().${callableMethod}($length,$breath)")
+      case RectangleCodeFeatures(_, _, 0, 2, false, true, _) => return Seq(s"${className}.${callableMethod}($length,$breath)")
+      case RectangleCodeFeatures(_, _, 0, 2, true, true, _) => return Seq(s"${className}.${callableMethod}($length,$breath)")
+      case RectangleCodeFeatures(_, _, 0, 0, _, _, true) => return Seq(
+        s"$className rectangle = new $className();",
+        s"rectangle.${setterMethods(0)}($length);",
+        s"rectangle.${setterMethods(1)}($breath);",
+        "rectangle.calculate_area();"
+      )
+      case _ => throw new RuntimeException("This path is not coded!")
+    }
+
+  }
+}
 
 case class RectangleCodeMetrics() {
 
@@ -63,29 +92,15 @@ case class RectangleCodeMetrics() {
   def getTestStatements(rectangle: ReferenceRectangleImplementation): Seq[String] = { // TODO - should likely extract these conditions out
     // TODO - add appropriate feedbacks in these cases
 
-    val configuration = GeneralCodeFeatures(hasDefinedClass, hasCallableMethod, numberOfConstructorParameters, numberOfCallableMethodParameters, hasConstructor, isCallableMethodStatic, hasSetterMethods)
+    val configuration = RectangleCodeFeatures(hasDefinedClass, hasCallableMethod, numberOfConstructorParameters, numberOfCallableMethodParameters, hasConstructor, isCallableMethodStatic, hasSetterMethods)
 
     // TODO - there should be a way  of naming these case statements, but currently I'm struggling to do that...
 
-    configuration match {
-      case GeneralCodeFeatures(false, _, _, _, _, _, _) => throw new RuntimeException("Did not find a class")
-      case GeneralCodeFeatures(_, false, _, _, _, _, _) => throw new RuntimeException("Did not find a method that can be called")
-      case GeneralCodeFeatures(_, _, 2, 0, _, _, _) => return Seq(s"new ${className}(${rectangle.length},${rectangle.breath}).${callableMethod}()")
-      case GeneralCodeFeatures(_, _, 0, 2, false, false, _) => return Seq(s"new ${className}().${callableMethod}(${rectangle.length},${rectangle.breath})")
-      case GeneralCodeFeatures(_, _, 0, 2, false, true, _) => return Seq(s"${className}.${callableMethod}(${rectangle.length},${rectangle.breath})")
-      case GeneralCodeFeatures(_, _, 0, 2, true, true, _) => return Seq(s"${className}.${callableMethod}(${rectangle.length},${rectangle.breath})")
-      case GeneralCodeFeatures(_, _, 0, 0, _, _, true) => return Seq(
-        s"$className rectangle = new $className();",
-        s"rectangle.${setterMethodNames(0)}(${rectangle.length});",
-        s"rectangle.${setterMethodNames(1)}(${rectangle.breath});",
-        "rectangle.calculate_area();"
-      )
-      case _ => throw new RuntimeException("This path is not coded!")
-    }
+    return configuration.statements(className,rectangle,callableMethod,setterMethodNames)
 
-    feedbacks.add("NON_UNDERSTANDABLE_API") // TODO - test this.
+//    feedbacks.add("NON_UNDERSTANDABLE_API") // TODO - test this.
 
-    Seq.empty[String]
+//    Seq.empty[String]
   }
 
   def setHasDefinedAClass(): Unit = {
