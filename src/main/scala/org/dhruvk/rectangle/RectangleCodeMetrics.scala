@@ -100,15 +100,10 @@ case class RectangleCodeMetrics() {
       case (_,_,2,0,_,_) => return Seq(s"new ${getClassName.get}(${rectangle.length},${rectangle.breath}).${getCallableMethod.get}()")
       case (_,_,0,2,false,false) => return Seq(s"new ${getClassName.get}().${getCallableMethod.get}(${rectangle.length},${rectangle.breath})")
       case (_,_,0,2,false,true) => return Seq(s"${getClassName.get}.${getCallableMethod.get}(${rectangle.length},${rectangle.breath})")
+      case (_,_,0,2,true,true) => return Seq(s"${getClassName.get}.${getCallableMethod.get}(${rectangle.length},${rectangle.breath})")
       case _ => ""
 
     }
-
-    //
-
-
-    //    // There is likely an unnecessary constructor
-    if (hasConstructor && numberOfConstructorParameters == 0 && getCallableMethod.isDefined && isCallableMethodStatic && numberOfCallableMethodParameters == 2) return Seq(s"${getClassName.get}.${getCallableMethod.get}(${rectangle.length},${rectangle.breath})")
     //
 
     if (hasSetterMethods && numberOfCallableMethodParameters == 0) return Seq(
