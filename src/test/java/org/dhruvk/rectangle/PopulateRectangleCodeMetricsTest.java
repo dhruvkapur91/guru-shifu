@@ -5,7 +5,9 @@ import com.github.javaparser.ast.CompilationUnit;
 import jdk.jshell.JShell;
 import jdk.jshell.SnippetEvent;
 import org.junit.jupiter.api.Test;
+import scala.collection.Seq;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static jdk.jshell.Snippet.Status.REJECTED;
@@ -228,7 +230,7 @@ class PopulateRectangleCodeMetricsTest {
     }
 
     private void verifyOne(JShell jShell, RectangleCodeMetrics rectangleCodeMetrics, ReferenceRectangle referenceRectangle) {
-        List<String> testStatements = rectangleCodeMetrics.getTestStatements(referenceRectangle);
+        List<String> testStatements = convert(rectangleCodeMetrics.getTestStatements(referenceRectangle));
         if(testStatements.isEmpty()) {
             fail("Unable to find the invoke expression");
         }
@@ -245,6 +247,12 @@ class PopulateRectangleCodeMetricsTest {
         assertThat("Expected value %s to be %d".formatted(result, referenceRectangle.area()),
                 Integer.parseInt(result), is(referenceRectangle.area()));
 
+    }
+
+    public static List<String> convert(Seq<String> testStatements) {
+        List<String> strings = new ArrayList<>();
+        testStatements.foreach(strings::add);
+        return strings;
     }
 
 }

@@ -2,8 +2,11 @@ package org.dhruvk.rectangle;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import scala.Function1;
+import scala.collection.Seq;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -11,13 +14,20 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+
 // TODO - need to find a way to detect someone playing the system.. that'll be when they just click submit to get all the feedback... or something similar.. that's why its really important to capture things on timeline...
 
 public class RectangleClassFeedbackTest {
 
+    static Set<String> convert(scala.collection.immutable.Set<String> set) {
+        Set<String> javaSet = new HashSet<String>();
+        set.foreach(javaSet::add);
+        return javaSet;
+    }
+
     @Test
     void shouldGiveFeedbackIfThereIsNoClass() {
-        Set<String> feedbacks = new RectangleClassFeedback("").suggestionKey();
+        Set<String> feedbacks = convert(new RectangleClassFeedback("").suggestionKey());
         assertThat(feedbacks, containsInAnyOrder(
                 "NO_CONSTRUCTOR_FOUND",
                 "NO_FIELDS_FOUND",
@@ -33,7 +43,7 @@ public class RectangleClassFeedbackTest {
                 }
                 """;
 
-        Set<String> feedbacks = new RectangleClassFeedback(sourceCode).suggestionKey();
+        Set<String> feedbacks = convert(new RectangleClassFeedback(sourceCode).suggestionKey());
         assertThat(feedbacks, containsInAnyOrder(
                 "NO_CONSTRUCTOR_FOUND",
                 "NO_FIELDS_FOUND"
@@ -50,7 +60,7 @@ public class RectangleClassFeedbackTest {
                 }
                 """;
 
-        Set<String> feedbacks = new RectangleClassFeedback(sourceCode).suggestionKey();
+        Set<String> feedbacks = convert(new RectangleClassFeedback(sourceCode).suggestionKey());
         assertThat(feedbacks, containsInAnyOrder(
                 "NO_CONSTRUCTOR_PARAMETER",
                 "NO_FIELDS_FOUND"
@@ -67,7 +77,7 @@ public class RectangleClassFeedbackTest {
                 }
                 """;
 
-        Set<String> feedbacks = new RectangleClassFeedback(sourceCode).suggestionKey();
+        Set<String> feedbacks = convert(new RectangleClassFeedback(sourceCode).suggestionKey());
         assertThat(feedbacks, containsInAnyOrder(
                 "ONLY_ONE_CONSTRUCTOR_PARAMETER",
                 "NO_FIELDS_FOUND"
@@ -85,7 +95,7 @@ public class RectangleClassFeedbackTest {
                 }
                 """;
 
-        Set<String> feedbacks = new RectangleClassFeedback(sourceCode).suggestionKey();
+        Set<String> feedbacks = convert(new RectangleClassFeedback(sourceCode).suggestionKey());
         assertThat(feedbacks, containsInAnyOrder(
                 "TOO_MANY_CONSTRUCTOR_PARAMETER",
                 "NO_FIELDS_FOUND"
@@ -103,7 +113,7 @@ public class RectangleClassFeedbackTest {
                 }
                 """;
 
-        Set<String> feedbacks = new RectangleClassFeedback(sourceCode).suggestionKey();
+        Set<String> feedbacks = convert(new RectangleClassFeedback(sourceCode).suggestionKey());
         assertThat(feedbacks, is(Set.of("NO_FIELDS_FOUND")));
     }
 
@@ -121,7 +131,7 @@ public class RectangleClassFeedbackTest {
                 }
                 """;
 
-        Set<String> feedbacks = new RectangleClassFeedback(sourceCode).suggestionKey();
+        Set<String> feedbacks = convert(new RectangleClassFeedback(sourceCode).suggestionKey());
         assertThat(feedbacks, containsInAnyOrder(
                 "FIELDS_SHOULD_BE_PRIVATE"
         ));
@@ -144,7 +154,7 @@ public class RectangleClassFeedbackTest {
                 }
                 """;
 
-        Set<String> feedbacks = new RectangleClassFeedback(sourceCode).suggestionKey();
+        Set<String> feedbacks = convert(new RectangleClassFeedback(sourceCode).suggestionKey());
         assertThat(feedbacks, containsInAnyOrder(
                 "METHOD_NAME_BREAKS_ENCAPSULATION",
                 "JAVA_METHOD_NAMING_CONVENTIONS_NOT_FOLLOWED"
@@ -169,7 +179,7 @@ public class RectangleClassFeedbackTest {
                 }
                 """;
 
-        Set<String> feedbacks = new RectangleClassFeedback(sourceCode).suggestionKey();
+        Set<String> feedbacks = convert(new RectangleClassFeedback(sourceCode).suggestionKey());
         assertThat(feedbacks, containsInAnyOrder(
                 "METHOD_NAME_BREAKS_ENCAPSULATION",
                 "JAVA_METHOD_NAMING_CONVENTIONS_NOT_FOLLOWED",
@@ -196,7 +206,7 @@ public class RectangleClassFeedbackTest {
                 }
                 """;
 
-        Set<String> feedbacks = new RectangleClassFeedback(sourceCode).suggestionKey();
+        Set<String> feedbacks = convert(new RectangleClassFeedback(sourceCode).suggestionKey());
         assertThat(feedbacks, containsInAnyOrder(
                 "FIELDS_CAN_BE_FINAL"
         ));
@@ -229,8 +239,8 @@ public class RectangleClassFeedbackTest {
                 }
                 """;
 
-        Set<String> feedbacksForGet = new RectangleClassFeedback(sourceCodeWithGet).suggestionKey();
-        Set<String> feedbacksForCalculate = new RectangleClassFeedback(sourceCodeWithCalculate).suggestionKey();
+        Set<String> feedbacksForGet = convert(new RectangleClassFeedback(sourceCodeWithGet).suggestionKey());
+        Set<String> feedbacksForCalculate = convert(new RectangleClassFeedback(sourceCodeWithCalculate).suggestionKey());
 
 
         assertAll(
@@ -261,7 +271,7 @@ public class RectangleClassFeedbackTest {
                 }
                 """;
 
-        Set<String> feedbacks = new RectangleClassFeedback(sourceCode).suggestionKey();
+        Set<String> feedbacks = convert(new RectangleClassFeedback(sourceCode).suggestionKey());
         assertThat(feedbacks, is(Set.of("UNKNOWN_SCENARIO")));
     }
 
@@ -281,7 +291,7 @@ public class RectangleClassFeedbackTest {
                 }
                 """;
 
-        Set<String> feedbacks = new RectangleClassFeedback(sourceCode).suggestionKey();
+        Set<String> feedbacks = convert(new RectangleClassFeedback(sourceCode).suggestionKey());
         assertThat(feedbacks, is(Set.of("UNKNOWN_SCENARIO")));
     }
 }
