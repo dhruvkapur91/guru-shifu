@@ -13,6 +13,7 @@ import java.util.List;
 import static jdk.jshell.Snippet.Status.REJECTED;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /*
@@ -239,6 +240,38 @@ class PopulateRectangleCodeMetricsTest {
 
     }
 
+    @Test
+    void shouldFindAnInvalidImplementation() {
+        String someImplementation = """
+                class Rectangle {
+                
+                    int length;
+                    int breath;
+                    
+                    public Rectangle() {
+                    }
+                    
+                    public void length(int length) {
+                        this.length = length;
+                    }
+                    
+                    public void breath(int breath) {
+                        this.breath = length; // BUG!
+                    }
+                
+                    public int calculate_area() {
+                        return length * breath;
+                    }
+                }
+                """;
+        JShell jShell = getjShell(someImplementation);
+        RectangleCodeMetrics rectangleCodeMetrics = populateRectangleCodeMetrics(someImplementation);
+
+        assertThrows(AssertionError.class, () -> verifyForAllInputs(jShell, rectangleCodeMetrics));
+
+        jShell.close(); // TODO - should use closable syntax
+
+    }
 
     private JShell getjShell(String someImplementation) {
         JShell jShell = JShell.create();
