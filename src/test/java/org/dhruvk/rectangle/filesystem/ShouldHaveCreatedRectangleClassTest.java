@@ -1,12 +1,11 @@
-package org.dhruvk.rectangle;
+package org.dhruvk.rectangle.filesystem;
 
+import org.dhruvk.rectangle.filesystem.ShouldHaveCreatedRectangleClass;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;

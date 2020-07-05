@@ -1,4 +1,6 @@
-package org.dhruvk.rectangle;
+package org.dhruvk.rectangle.filesystem;
+
+import org.dhruvk.rectangle.Rule;
 
 import java.io.IOException;
 import java.nio.file.Files;
