@@ -127,6 +127,7 @@ class RectangleCodeMetrics {
                     ));
         }
 
+        // Assuming no constuctor, there is a procedural callable method and its static
         if (!hasConstructor && getCallableMethod().isPresent() && isCallableMethodStatic) {
             return Optional.of("%s.%s(%d,%d)".formatted(
                     getClassName().get(),
@@ -135,6 +136,17 @@ class RectangleCodeMetrics {
                     rectangle.getBreath()
                     ));
         }
+
+        // There is likely an unnecessary constructor
+        if (hasConstructor && numberOfConstructorParameters == 0 && getCallableMethod().isPresent() && isCallableMethodStatic) {
+            return Optional.of("%s.%s(%d,%d)".formatted(
+                    getClassName().get(),
+                    getCallableMethod().get(),
+                    rectangle.getLength(),
+                    rectangle.getBreath()
+            ));
+        }
+
         feedbacks.add("NON_UNDERSTANDABLE_API"); // TODO - test this.
         return Optional.empty();
     }

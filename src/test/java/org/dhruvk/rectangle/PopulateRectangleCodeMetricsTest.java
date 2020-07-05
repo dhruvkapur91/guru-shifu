@@ -148,6 +148,28 @@ class PopulateRectangleCodeMetricsTest {
 
     }
 
+    @Test
+    void shouldPopulateInvokeExpressionCorrectlyIfProceduralWayWasUsedWithStaticMethodWithRedundantConstructor() {
+        String someImplementation = """
+                class Rectangle {
+                    
+                    public Rectangle() {
+                    }
+                
+                    public static int calculate_area(int length, int breath) {
+                        return length * breath;
+                    }
+                }
+                """;
+        JShell jShell = getjShell(someImplementation);
+        RectangleCodeMetrics rectangleCodeMetrics = populateRectangleCodeMetrics(someImplementation);
+
+        verifyForAllInputs(jShell, rectangleCodeMetrics);
+
+        jShell.close(); // TODO - should use closable syntax
+
+    }
+
 
     private JShell getjShell(String someImplementation) {
         JShell jShell = JShell.create();
