@@ -92,20 +92,17 @@ case class RectangleCodeMetrics() {
   def getTestStatements(rectangle: ReferenceRectangle): Seq[String] = { // TODO - should likely extract these conditions out
     // TODO - add appropriate feedbacks in these cases
 
-    val configuration = (hasDefinedClass,hasCallableMethod,numberOfConstructorParameters,numberOfCallableMethodParameters)
+    val configuration = (hasDefinedClass,hasCallableMethod,numberOfConstructorParameters,numberOfCallableMethodParameters,hasConstructor,isCallableMethodStatic)
 
     configuration match {
-      case (false,_,_,_) => throw new RuntimeException("Did not find a class")
-      case (_,false,_,_) => throw new RuntimeException("Did not find a method that can be called")
-      case (_,_,2,0) => return Seq(s"new ${getClassName.get}(${rectangle.length},${rectangle.breath}).${getCallableMethod.get}()")
+      case (false,_,_,_,_,_) => throw new RuntimeException("Did not find a class")
+      case (_,false,_,_,_,_) => throw new RuntimeException("Did not find a method that can be called")
+      case (_,_,2,0,_,_) => return Seq(s"new ${getClassName.get}(${rectangle.length},${rectangle.breath}).${getCallableMethod.get}()")
+      case (_,_,0,2,false,false) => return Seq(s"new ${getClassName.get}().${getCallableMethod.get}(${rectangle.length},${rectangle.breath})")
       case _ => ""
+
     }
 
-
-    //
-    //    // Assuming we use default constructor and some public callable method is present with 2 args
-    if (!hasConstructor && getCallableMethod.isDefined && !isCallableMethodStatic && numberOfCallableMethodParameters == 2) return Seq(s"new ${getClassName.get}().${getCallableMethod.get}(${rectangle.length},${rectangle.breath})")
-    //
 
 
     //    // Assuming no constuctor, there is a procedural callable method and its static
