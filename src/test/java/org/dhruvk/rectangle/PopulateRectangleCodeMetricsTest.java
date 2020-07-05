@@ -6,13 +6,9 @@ import jdk.jshell.JShell;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
-import static java.lang.Boolean.TRUE;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /*
 I think the biggest difference b/w Exercism and us is that Exercism enforces an API, while we want people to come up with it... that means its harder to run tests to check functionality... Does it work? Hard to answer if API is unknown
@@ -76,18 +72,15 @@ class PopulateRectangleCodeMetricsTest {
     }
 
     private void verifyForAllInputs(JShell jShell, RectangleCodeMetrics rectangleCodeMetrics) {
-        Map<ReferenceRectangle, Boolean> collect = referenceRectangles
-                .stream()
-                .map(referenceRectangle -> verifyOne(jShell, rectangleCodeMetrics, referenceRectangle))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        referenceRectangles
+                .forEach(referenceRectangle -> verifyOne(jShell, rectangleCodeMetrics, referenceRectangle));
 
-        assertTrue(collect.values().stream().allMatch(p -> p.equals(TRUE)));
     }
 
-    private Map.Entry<ReferenceRectangle, Boolean> verifyOne(JShell jShell, RectangleCodeMetrics rectangleCodeMetrics, ReferenceRectangle referenceRectangle) {
+    private void verifyOne(JShell jShell, RectangleCodeMetrics rectangleCodeMetrics, ReferenceRectangle referenceRectangle) {
         String testExpression = rectangleCodeMetrics.invokeExpression(referenceRectangle).get();
         String value = jShell.eval(testExpression).get(0).value();
-        return Map.entry(referenceRectangle, Integer.parseInt(value) == referenceRectangle.area());
+        assertThat("Expected value %s to be %d".formatted(value, referenceRectangle.area()),Integer.parseInt(value), is(referenceRectangle.area()));
     }
 
 }
