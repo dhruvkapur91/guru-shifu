@@ -3,11 +3,12 @@ package org.dhruvk.rectangle;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import jdk.jshell.JShell;
+import jdk.jshell.SnippetEvent;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.Optional;
 
+import static jdk.jshell.Snippet.Status.REJECTED;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -170,10 +171,46 @@ class PopulateRectangleCodeMetricsTest {
 
     }
 
+    @Test
+    void shouldPopulateInvokeExpressionCorrectlyIfSettersAreUsed() {
+        String someImplementation = """
+                class Rectangle {
+                
+                    int length;
+                    int breath;
+                    
+                    public Rectangle() {
+                    }
+                    
+                    public void setLength(int length) {
+                        this.length = length;
+                    }
+                    
+                    public void setBreath(int breath) {
+                        this.breath = breath;
+                    }
+                
+                    public int calculate_area() {
+                        return length * breath;
+                    }
+                }
+                """;
+        JShell jShell = getjShell(someImplementation);
+        RectangleCodeMetrics rectangleCodeMetrics = populateRectangleCodeMetrics(someImplementation);
+
+        verifyForAllInputs(jShell, rectangleCodeMetrics);
+
+        jShell.close(); // TODO - should use closable syntax
+
+    }
+
 
     private JShell getjShell(String someImplementation) {
         JShell jShell = JShell.create();
-        jShell.eval(someImplementation);
+        List<SnippetEvent> eval = jShell.eval(someImplementation);
+        if(eval.get(0).status().equals(REJECTED)) {
+            fail("The code in the test snippet does not compile properly");
+        }
         return jShell;
     }
 
@@ -191,13 +228,23 @@ class PopulateRectangleCodeMetricsTest {
     }
 
     private void verifyOne(JShell jShell, RectangleCodeMetrics rectangleCodeMetrics, ReferenceRectangle referenceRectangle) {
-        Optional<String> optionalTestExpression = rectangleCodeMetrics.invokeExpression(referenceRectangle);
-        if(optionalTestExpression.isEmpty()) {
+        List<String> testStatements = rectangleCodeMetrics.getTestStatements(referenceRectangle);
+        if(testStatements.isEmpty()) {
             fail("Unable to find the invoke expression");
         }
-        String testExpression = optionalTestExpression.get();
-        String value = jShell.eval(testExpression).get(0).value();
-        assertThat("Expected value %s to be %d".formatted(value, referenceRectangle.area()),Integer.parseInt(value), is(referenceRectangle.area()));
+
+        String result = "";
+        for(String statement : testStatements) {
+            List<SnippetEvent> eval = jShell.eval(statement);
+            SnippetEvent snippetEvent = eval.get(0);
+            if(snippetEvent.status().equals(REJECTED)) {
+                fail("The statement %s does not compile properly".formatted(statement));
+            }
+            result = snippetEvent.value();
+        }
+        assertThat("Expected value %s to be %d".formatted(result, referenceRectangle.area()),
+                Integer.parseInt(result), is(referenceRectangle.area()));
+
     }
 
 }

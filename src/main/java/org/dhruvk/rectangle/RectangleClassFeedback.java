@@ -4,6 +4,7 @@ import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -22,12 +23,14 @@ class RectangleCodeMetrics {
     private static final String JAVA_METHOD_NAMING_CONVENTIONS_NOT_FOLLOWED = "JAVA_METHOD_NAMING_CONVENTIONS_NOT_FOLLOWED";
     private static final String JAVA_FIELD_NAMING_CONVENTIONS_NOT_FOLLOWED = "JAVA_FIELD_NAMING_CONVENTIONS_NOT_FOLLOWED";
 
+    private boolean hasSetterMethods = false;
     private final Set<String> feedbacks = new HashSet<>(); // TODO - think list or set, currently we maybe loosing information by keeping it a set.... I think we should have a list internally and a set externally... but this will do for now...
     private int numberOfConstructorParameters = 0;
     private String className;
     private String callableMethod;
     private boolean hasConstructor = false;
     private boolean isCallableMethodStatic = false;
+    private int numberOfCallableMethodParameters = 0;
 
     RectangleCodeMetrics() {
         feedbacks.addAll(
@@ -104,12 +107,20 @@ class RectangleCodeMetrics {
         this.isCallableMethodStatic = true;
     }
 
+    public void markHasSetterMethods() {
+        this.hasSetterMethods = true;
+    }
+
     // TODO - maybe we can use java-parser for generating the call expressions too, but couldn't find a way to do it as of now...
-    public Optional<String> invokeExpression(ReferenceRectangle rectangle) {
+    public List<String> getTestStatements(ReferenceRectangle rectangle) {
         // TODO - should likely extract these conditions out
         // TODO - add appropriate feedbacks in these cases
-        if (numberOfConstructorParameters == 2 && getClassName().isPresent() && getCallableMethod().isPresent()) {
-            return Optional.of("new %s(%d,%d).%s()".formatted(
+        if (numberOfConstructorParameters == 2
+                && getClassName().isPresent()
+                && getCallableMethod().isPresent()
+                && numberOfCallableMethodParameters == 0
+        ) {
+            return List.of("new %s(%d,%d).%s()".formatted(
                     getClassName().get(),
                     rectangle.getLength(),
                     rectangle.getBreath(),
@@ -118,28 +129,12 @@ class RectangleCodeMetrics {
         }
 
         // Assuming we use default constructor and some public callable method is present with 2 args
-        if (!hasConstructor && getCallableMethod().isPresent() && !isCallableMethodStatic) {
-            return Optional.of("new %s().%s(%d,%d)".formatted(
-                    getClassName().get(),
-                    getCallableMethod().get(),
-                    rectangle.getLength(),
-                    rectangle.getBreath()
-                    ));
-        }
-
-        // Assuming no constuctor, there is a procedural callable method and its static
-        if (!hasConstructor && getCallableMethod().isPresent() && isCallableMethodStatic) {
-            return Optional.of("%s.%s(%d,%d)".formatted(
-                    getClassName().get(),
-                    getCallableMethod().get(),
-                    rectangle.getLength(),
-                    rectangle.getBreath()
-                    ));
-        }
-
-        // There is likely an unnecessary constructor
-        if (hasConstructor && numberOfConstructorParameters == 0 && getCallableMethod().isPresent() && isCallableMethodStatic) {
-            return Optional.of("%s.%s(%d,%d)".formatted(
+        if (!hasConstructor
+                && getCallableMethod().isPresent()
+                && !isCallableMethodStatic
+                && numberOfCallableMethodParameters == 2
+        ) {
+            return List.of("new %s().%s(%d,%d)".formatted(
                     getClassName().get(),
                     getCallableMethod().get(),
                     rectangle.getLength(),
@@ -147,10 +142,54 @@ class RectangleCodeMetrics {
             ));
         }
 
+        // Assuming no constuctor, there is a procedural callable method and its static
+        if (!hasConstructor
+                && getCallableMethod().isPresent()
+                && isCallableMethodStatic
+                && numberOfCallableMethodParameters == 2
+        ) {
+            return List.of("%s.%s(%d,%d)".formatted(
+                    getClassName().get(),
+                    getCallableMethod().get(),
+                    rectangle.getLength(),
+                    rectangle.getBreath()
+            ));
+        }
+
+        // There is likely an unnecessary constructor
+        if (hasConstructor
+                && numberOfConstructorParameters == 0
+                && getCallableMethod().isPresent()
+                && isCallableMethodStatic
+                && numberOfCallableMethodParameters == 2
+        ) {
+            return List.of("%s.%s(%d,%d)".formatted(
+                    getClassName().get(),
+                    getCallableMethod().get(),
+                    rectangle.getLength(),
+                    rectangle.getBreath()
+            ));
+        }
+
+        if (hasSetterMethods
+                && numberOfCallableMethodParameters == 0
+        ) {
+
+            return List.of(
+                    "Rectangle rectangle = new Rectangle();",
+                    "rectangle.setLength(%d);".formatted(rectangle.getLength()),
+                    "rectangle.setBreath(%d);".formatted(rectangle.getBreath()),
+                    "rectangle.calculate_area();"
+            );
+        }
+
         feedbacks.add("NON_UNDERSTANDABLE_API"); // TODO - test this.
-        return Optional.empty();
+        return List.of();
     }
 
+    public void setNumberOfCallableMethodParameters(int number) {
+        this.numberOfCallableMethodParameters = number;
+    }
 }
 
 public class RectangleClassFeedback implements Rule {

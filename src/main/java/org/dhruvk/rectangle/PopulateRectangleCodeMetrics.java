@@ -33,11 +33,18 @@ class PopulateRectangleCodeMetrics extends VoidVisitorAdapter<RectangleCodeMetri
     @Override
     public void visit(MethodDeclaration someMethod, RectangleCodeMetrics arg) {
         super.visit(someMethod, arg);
+
         boolean containsUnderscore = someMethod.toString().toLowerCase().contains("_");
         if (containsUnderscore) arg.markSomeMethodBreaksJavaConventions();
+
         boolean containsGet = someMethod.getNameAsString().toLowerCase().contains("get");
         boolean containsCalculate = someMethod.getNameAsString().toLowerCase().contains("calculate");
         if (containsGet || containsCalculate) arg.markSomeMethodNameBreaksEncapsulation();
+
+        if (someMethod.getNameAsString().toLowerCase().contains("set")) {
+            arg.markHasSetterMethods();
+        }
+
         if(someMethod.isPublic()) {
             arg.setCallableMethod(someMethod.getNameAsString());
         }
@@ -45,5 +52,7 @@ class PopulateRectangleCodeMetrics extends VoidVisitorAdapter<RectangleCodeMetri
             arg.setCallableMethod(someMethod.getNameAsString());
             arg.markCallableMethodIsStatic();
         }
+        arg.setNumberOfCallableMethodParameters(someMethod.getParameters().size());
+
     }
 }
