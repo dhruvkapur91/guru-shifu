@@ -8,12 +8,12 @@ class PopulateRectangleCodeMetrics extends VoidVisitorAdapter[RectangleCodeMetri
   override def visit(n: ClassOrInterfaceDeclaration, metrics: RectangleCodeMetrics): Unit = {
     super.visit(n, metrics)
     metrics.setClassName(n.getNameAsString)
-    metrics.setHasDefinedClass()
+    metrics.setHasDefinedAClass()
   }
 
   override def visit(constructorDeclaration: ConstructorDeclaration, arg: RectangleCodeMetrics): Unit = {
     super.visit(constructorDeclaration, arg)
-    arg.markHasConstructor()
+    arg.markHasAConstructor()
     val parameters = constructorDeclaration.getParameters
     arg.setNumberOfConstructorParameters(parameters.size())
   }

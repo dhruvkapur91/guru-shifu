@@ -47,7 +47,7 @@ case class RectangleCodeMetrics() {
     feedbacks
   }
 
-  def setHasDefinedClass(): Unit = {
+  def setHasDefinedAClass(): Unit = {
     feedbacks.remove(NO_CLASS_FOUND)
     this.hasDefinedClass = true;
   }
@@ -72,7 +72,7 @@ case class RectangleCodeMetrics() {
     feedbacks.add(JAVA_METHOD_NAMING_CONVENTIONS_NOT_FOLLOWED)
   }
 
-  def markHasConstructor(): Unit = {
+  def markHasAConstructor(): Unit = {
     feedbacks.remove(NO_CONSTRUCTOR_FOUND)
     hasConstructor = true
   }
