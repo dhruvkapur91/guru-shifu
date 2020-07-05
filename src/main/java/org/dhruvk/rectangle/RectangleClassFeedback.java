@@ -25,6 +25,7 @@ class RectangleCodeMetrics {
     private final Set<String> feedbacks = new HashSet<>(); // TODO - think list or set, currently we maybe loosing information by keeping it a set.... I think we should have a list internally and a set externally... but this will do for now...
     private int numberOfConstructorParameters = 0;
     private String className;
+    private String callableMethod;
 
     RectangleCodeMetrics() {
         feedbacks.addAll(
@@ -88,9 +89,18 @@ class RectangleCodeMetrics {
         className = nameAsString;
     }
 
+    public void setCallableMethod(String callableMethod) {
+        this.callableMethod = callableMethod;
+    }
+
     public Optional<String> invokeExpression(ReferenceRectangle rectangle) {
         if (numberOfConstructorParameters == 2 && getClassName().isPresent()) { // TODO - maybe we can use java-parser for generating the call expressions too, but couldn't find a way to do it as of now...
-            return Optional.of("new %s(%d,%d).area()".formatted(getClassName().get(), rectangle.getLength(), rectangle.getBreath()));
+            return Optional.of("new %s(%d,%d).%s()".formatted(
+                    getClassName().get(),
+                    rectangle.getLength(),
+                    rectangle.getBreath(),
+                    callableMethod
+            ));
         }
         feedbacks.add("NON_UNDERSTANDABLE_API"); // TODO - test this.
         return Optional.empty();

@@ -38,5 +38,8 @@ class PopulateRectangleCodeMetrics extends VoidVisitorAdapter<RectangleCodeMetri
         boolean containsGet = someMethod.getNameAsString().toLowerCase().contains("get");
         boolean containsCalculate = someMethod.getNameAsString().toLowerCase().contains("calculate");
         if (containsGet || containsCalculate) arg.markSomeMethodNameBreaksEncapsulation();
+        if(someMethod.isPublic()) {
+            arg.setCallableMethod(someMethod.getNameAsString());
+        }
     }
 }
