@@ -5,6 +5,19 @@ import org.dhruvk.rectangle.RectangleCodeMetrics._
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
+// As a user, what I have is source code and what I care about is does this meet my requirement, and if yes, what's the feedback
+// Currently the way I achive it is
+// 1. SEnd the source code to Visitor
+// 2. Visitor gives back Metrics
+// 3. Metrics gives back feedbacks and statements that can be used for testing
+// What I should rather have is
+// Input source code, Get feedbacks
+// Whole dependency could look like, or should look like ->
+// DirectoryLayout => Features => Visitor => SourceCode => Features => RuntimeEnvironment => Feedbacks
+// Features is an object which can act as accumulator for features
+
+// Reminder to self - Running part, the test statemets is really imporant... because that validates that I understood the participant's implementation correcntly..
+
 case class GeneralCodeFeatures(
                                 hasDefinedClass: Boolean,
                                 hasCallableMethod: Boolean,
@@ -21,6 +34,7 @@ case class RectangleCodeMetrics() {
   private var hasSetterMethods: Boolean = false
   private val feedbacks: mutable.Set[String] = new mutable.HashSet[String] // TODO - think list or set, currently we maybe loosing information by keeping it a set.... I think we should have a list internally and a set externally... but this will do for now...
 
+  private var numberOfFields = 0
   private var hasCallableMethod = false
   private var hasDefinedClass = false
   private var numberOfConstructorParameters: Int = 0
@@ -36,12 +50,11 @@ case class RectangleCodeMetrics() {
     setterMethodNames += name
   }
 
-  feedbacks += NO_CLASS_FOUND
-  feedbacks += NO_CONSTRUCTOR_FOUND
-  feedbacks += NO_FIELDS_FOUND
-
   def getFeedbacks: Set[String] = {
-    if (!feedbacks.contains(NO_CONSTRUCTOR_FOUND) && numberOfConstructorParameters == 0) feedbacks.add(NO_CONSTRUCTOR_PARAMETER)
+    if(!hasDefinedClass) feedbacks.add(NO_CLASS_FOUND)
+    if(!hasConstructor) feedbacks.add(NO_CONSTRUCTOR_FOUND)
+    if(numberOfFields == 0) feedbacks.add(NO_FIELDS_FOUND)
+    if (hasConstructor && numberOfConstructorParameters == 0) feedbacks.add(NO_CONSTRUCTOR_PARAMETER)
     if (numberOfConstructorParameters == 1) feedbacks.add(ONLY_ONE_CONSTRUCTOR_PARAMETER)
     if (numberOfConstructorParameters > 2) feedbacks.add(TOO_MANY_CONSTRUCTOR_PARAMETER)
     feedbacks.toSet
@@ -68,7 +81,6 @@ case class RectangleCodeMetrics() {
         "rectangle.calculate_area();"
       )
       case _ => throw new RuntimeException("This path is not coded!")
-
     }
 
     feedbacks.add("NON_UNDERSTANDABLE_API") // TODO - test this.
@@ -76,9 +88,7 @@ case class RectangleCodeMetrics() {
     Seq.empty[String]
   }
 
-
   def setHasDefinedAClass(): Unit = {
-    feedbacks.remove(NO_CLASS_FOUND)
     this.hasDefinedClass = true;
   }
 
@@ -103,12 +113,11 @@ case class RectangleCodeMetrics() {
   }
 
   def markHasAConstructor(): Unit = {
-    feedbacks.remove(NO_CONSTRUCTOR_FOUND)
     hasConstructor = true
   }
 
   def incrementNumberOfFields(): Unit = {
-    feedbacks.remove(NO_FIELDS_FOUND)
+    this.numberOfFields += 1
   }
 
   def markSomeFieldIsNotFinal(): Unit = {
