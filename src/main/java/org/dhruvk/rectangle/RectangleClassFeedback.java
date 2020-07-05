@@ -26,6 +26,7 @@ class RectangleCodeMetrics {
     private int numberOfConstructorParameters = 0;
     private String className;
     private String callableMethod;
+    private boolean hasConstructor = false;
 
     RectangleCodeMetrics() {
         feedbacks.addAll(
@@ -71,6 +72,7 @@ class RectangleCodeMetrics {
 
     public void markHasConstructor() {
         feedbacks.remove(NO_CONSTRUCTOR_FOUND);
+        hasConstructor = true;
     }
 
     public void incrementNumberOfFields() {
@@ -85,6 +87,10 @@ class RectangleCodeMetrics {
         return className == null ? Optional.empty() : Optional.of(className);
     }
 
+    private Optional<String> getCallableMethod() {
+        return callableMethod == null ? Optional.empty() : Optional.of(callableMethod);
+    }
+
     public void setClassName(String nameAsString) {
         className = nameAsString;
     }
@@ -93,14 +99,26 @@ class RectangleCodeMetrics {
         this.callableMethod = callableMethod;
     }
 
+    // TODO - maybe we can use java-parser for generating the call expressions too, but couldn't find a way to do it as of now...
     public Optional<String> invokeExpression(ReferenceRectangle rectangle) {
-        if (numberOfConstructorParameters == 2 && getClassName().isPresent()) { // TODO - maybe we can use java-parser for generating the call expressions too, but couldn't find a way to do it as of now...
+        // TODO - should likely extract these conditions out
+        if (numberOfConstructorParameters == 2 && getClassName().isPresent() && getCallableMethod().isPresent()) {
             return Optional.of("new %s(%d,%d).%s()".formatted(
                     getClassName().get(),
                     rectangle.getLength(),
                     rectangle.getBreath(),
-                    callableMethod
+                    getCallableMethod().get()
             ));
+        }
+
+        // Assuming we use default constructor and some public callable method is present with 2 args
+        if (!hasConstructor && getCallableMethod().isPresent()) {
+            return Optional.of("new %s().%s(%d,%d)".formatted(
+                    getClassName().get(),
+                    getCallableMethod().get(),
+                    rectangle.getLength(),
+                    rectangle.getBreath()
+                    ));
         }
         feedbacks.add("NON_UNDERSTANDABLE_API"); // TODO - test this.
         return Optional.empty();
