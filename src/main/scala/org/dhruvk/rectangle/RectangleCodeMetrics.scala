@@ -47,6 +47,36 @@ case class RectangleCodeMetrics() {
     feedbacks
   }
 
+  def getTestStatements(rectangle: ReferenceRectangleImplementation): Seq[String] = { // TODO - should likely extract these conditions out
+    // TODO - add appropriate feedbacks in these cases
+
+    val configuration = GeneralCodeFeatures(hasDefinedClass, hasCallableMethod, numberOfConstructorParameters, numberOfCallableMethodParameters, hasConstructor, isCallableMethodStatic, hasSetterMethods)
+
+    // TODO - there should be a way  of naming these case statements, but currently I'm struggling to do that...
+
+    configuration match {
+      case GeneralCodeFeatures(false, _, _, _, _, _, _) => throw new RuntimeException("Did not find a class")
+      case GeneralCodeFeatures(_, false, _, _, _, _, _) => throw new RuntimeException("Did not find a method that can be called")
+      case GeneralCodeFeatures(_, _, 2, 0, _, _, _) => return Seq(s"new ${getClassName.get}(${rectangle.length},${rectangle.breath}).${getCallableMethod.get}()")
+      case GeneralCodeFeatures(_, _, 0, 2, false, false, _) => return Seq(s"new ${getClassName.get}().${getCallableMethod.get}(${rectangle.length},${rectangle.breath})")
+      case GeneralCodeFeatures(_, _, 0, 2, false, true, _) => return Seq(s"${getClassName.get}.${getCallableMethod.get}(${rectangle.length},${rectangle.breath})")
+      case GeneralCodeFeatures(_, _, 0, 2, true, true, _) => return Seq(s"${getClassName.get}.${getCallableMethod.get}(${rectangle.length},${rectangle.breath})")
+      case GeneralCodeFeatures(_, _, 0, 0, _, _, true) => return Seq(
+        s"$className rectangle = new $className();",
+        s"rectangle.${setterMethodNames(0)}(${rectangle.length});",
+        s"rectangle.${setterMethodNames(1)}(${rectangle.breath});",
+        "rectangle.calculate_area();"
+      )
+      case _ => throw new RuntimeException("This path is not coded!")
+
+    }
+
+    feedbacks.add("NON_UNDERSTANDABLE_API") // TODO - test this.
+
+    Seq.empty[String]
+  }
+
+
   def setHasDefinedAClass(): Unit = {
     feedbacks.remove(NO_CLASS_FOUND)
     this.hasDefinedClass = true;
@@ -104,35 +134,6 @@ case class RectangleCodeMetrics() {
 
   def markHasSetterMethods(): Unit = {
     this.hasSetterMethods = true
-  }
-
-  def getTestStatements(rectangle: ReferenceRectangleImplementation): Seq[String] = { // TODO - should likely extract these conditions out
-    // TODO - add appropriate feedbacks in these cases
-
-    val configuration = GeneralCodeFeatures(hasDefinedClass, hasCallableMethod, numberOfConstructorParameters, numberOfCallableMethodParameters, hasConstructor, isCallableMethodStatic, hasSetterMethods)
-
-    // TODO - there should be a way  of naming these case statements, but currently I'm struggling to do that...
-
-    configuration match {
-      case GeneralCodeFeatures(false, _, _, _, _, _, _) => throw new RuntimeException("Did not find a class")
-      case GeneralCodeFeatures(_, false, _, _, _, _, _) => throw new RuntimeException("Did not find a method that can be called")
-      case GeneralCodeFeatures(_, _, 2, 0, _, _, _) => return Seq(s"new ${getClassName.get}(${rectangle.length},${rectangle.breath}).${getCallableMethod.get}()")
-      case GeneralCodeFeatures(_, _, 0, 2, false, false, _) => return Seq(s"new ${getClassName.get}().${getCallableMethod.get}(${rectangle.length},${rectangle.breath})")
-      case GeneralCodeFeatures(_, _, 0, 2, false, true, _) => return Seq(s"${getClassName.get}.${getCallableMethod.get}(${rectangle.length},${rectangle.breath})")
-      case GeneralCodeFeatures(_, _, 0, 2, true, true, _) => return Seq(s"${getClassName.get}.${getCallableMethod.get}(${rectangle.length},${rectangle.breath})")
-      case GeneralCodeFeatures(_, _, 0, 0, _, _, true) => return Seq(
-        s"$className rectangle = new $className();",
-        s"rectangle.${setterMethodNames(0)}(${rectangle.length});",
-        s"rectangle.${setterMethodNames(1)}(${rectangle.breath});",
-        "rectangle.calculate_area();"
-      )
-      case _ => throw new RuntimeException("This path is not coded!")
-
-    }
-
-    feedbacks.add("NON_UNDERSTANDABLE_API") // TODO - test this.
-
-    Seq.empty[String]
   }
 
   def setNumberOfCallableMethodParameters(number: Int): Unit = {

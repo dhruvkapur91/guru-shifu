@@ -5,6 +5,8 @@ import com.github.javaparser.ast.visitor.VoidVisitorAdapter
 
 // This will usually be created per requirement to populate its associated metrics
 // For example in Rectangle I don't expect people to create multiple constructors for the first 2 requirements, hence this possiblility is not coded either in the visitor or in the metric
+// Job of the class
+// Populate the metrics from the code
 class PopulateRectangleCodeMetrics extends VoidVisitorAdapter[RectangleCodeMetrics] {
   override def visit(n: ClassOrInterfaceDeclaration, metrics: RectangleCodeMetrics): Unit = {
     super.visit(n, metrics)
