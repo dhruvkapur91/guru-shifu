@@ -25,6 +25,7 @@ import scala.collection.mutable.ArrayBuffer
 // 3. Feedback comes as a pattern match over the configuration space
 // 4. Progress comes as changes in the configuration space
 
+// TODO - possibly merge RectangleCodeFeatures and RectangleCodeMetrics?
 case class RectangleCodeFeatures(
                                 hasDefinedClass: Boolean,
                                 hasCallableMethod: Boolean,
@@ -37,6 +38,10 @@ case class RectangleCodeFeatures(
   def statements(className : String, rect : ReferenceRectangleImplementation, callableMethod : String, setterMethods : Seq[String]): Seq[String] = {
     val length = rect.length
     val breath = rect.breath
+
+    // TODO - add appropriate feedbacks in these cases
+    // TODO - is it possible to name these conditions?
+    // TODO - with conditions as pattern matching statements, can these patterns be runtime too? then we don't need to recompile the entire project for adding a new path...
 
     this match {
       case RectangleCodeFeatures(false, _, _, _, _, _, _) => throw new RuntimeException("Did not find a class")
@@ -89,18 +94,9 @@ case class RectangleCodeMetrics() {
     feedbacks.toSet
   }
 
-  def getTestStatements(rectangle: ReferenceRectangleImplementation): Seq[String] = { // TODO - should likely extract these conditions out
-    // TODO - add appropriate feedbacks in these cases
-
+  def getTestStatements(rectangle: ReferenceRectangleImplementation): Seq[String] = {
     val configuration = RectangleCodeFeatures(hasDefinedClass, hasCallableMethod, numberOfConstructorParameters, numberOfCallableMethodParameters, hasConstructor, isCallableMethodStatic, hasSetterMethods)
-
-    // TODO - there should be a way  of naming these case statements, but currently I'm struggling to do that...
-
     return configuration.statements(className,rectangle,callableMethod,setterMethodNames)
-
-//    feedbacks.add("NON_UNDERSTANDABLE_API") // TODO - test this.
-
-//    Seq.empty[String]
   }
 
   def setHasDefinedAClass(): Unit = {
